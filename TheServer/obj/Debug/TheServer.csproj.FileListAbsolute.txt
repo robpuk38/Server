@@ -1,0 +1,16 @@
+D:\TheServer\TheServer\TheServer\bin\Debug\TheServer.exe.config
+D:\TheServer\TheServer\TheServer\bin\Debug\TheServer.exe
+D:\TheServer\TheServer\TheServer\bin\Debug\TheServer.pdb
+D:\TheServer\TheServer\TheServer\obj\Debug\TheServer.csprojResolveAssemblyReference.cache
+D:\TheServer\TheServer\TheServer\obj\Debug\TheServer.exe
+D:\TheServer\TheServer\TheServer\obj\Debug\TheServer.pdb
+D:\TheServer\TheServer\TheServer\bin\Debug\MySql.Data.dll
+D:\TheServer\TheServer\TheServer\bin\Debug\MySql.Data.xml
+D:\GitHub\Server\TheServer\bin\Debug\TheServer.exe.config
+D:\GitHub\Server\TheServer\bin\Debug\TheServer.exe
+D:\GitHub\Server\TheServer\bin\Debug\TheServer.pdb
+D:\GitHub\Server\TheServer\bin\Debug\MySql.Data.xml
+D:\GitHub\Server\TheServer\obj\Debug\TheServer.csprojResolveAssemblyReference.cache
+D:\GitHub\Server\TheServer\obj\Debug\TheServer.exe
+D:\GitHub\Server\TheServer\obj\Debug\TheServer.pdb
+D:\GitHub\Server\TheServer\bin\Debug\MySql.Data.dll
