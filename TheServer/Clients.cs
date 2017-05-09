@@ -34,6 +34,9 @@ namespace TheServer
         public String UserGpsY { get; internal set; }
         public String UserGpsZ { get; internal set; }
         public String FirstTimeLogin { get; internal set; }
+        public String UserDeviceId { get; internal set; }
+        public String UserIpAddress { get; internal  set; }
+        public String UserAcctivation { get; internal  set; }
 
 
 
@@ -60,7 +63,10 @@ namespace TheServer
                        string _UserGpsX,
                        string _UserGpsY,
                        string _UserGpsZ,
-                       string _FirstTimeLogin)
+                       string _FirstTimeLogin, 
+                       string _UserDeviceId,
+                       string _UserIpAddress,
+                       string _UserAcctivation)
         {
             Id = _Id;
             UserId = _UserId;
@@ -86,6 +92,10 @@ namespace TheServer
             UserGpsY = _UserGpsY;
             UserGpsZ = _UserGpsZ;
             FirstTimeLogin = _FirstTimeLogin;
+            UserDeviceId = _UserDeviceId;
+            UserIpAddress = _UserIpAddress;
+            UserAcctivation = _UserAcctivation;
+
         }
 
 
@@ -119,7 +129,10 @@ namespace TheServer
     UserGpsX,
     UserGpsY,
     UserGpsZ,
-    FirstTimeLogin);
+    FirstTimeLogin,
+    UserDeviceId,
+    UserIpAddress,
+    UserAcctivation);
         }
 
 
@@ -133,35 +146,112 @@ namespace TheServer
 
 
 
-        private String Id { get;  set; }
-        private String UserId { get;  set; }
-        private String UserName { get;  set; }
-        private String UserPic { get;  set; }
-        private String UserFirstName { get;  set; }
-        private String UserLastName { get;  set; }
-        private String UserAccessToken { get;  set; }
+        private String Id { get; set; }
+        private String UserId { get; set; }
+        private String UserName { get; set; }
+        private String UserPic { get; set; }
+        private String UserFirstName { get; set; }
+        private String UserLastName { get; set; }
+        private String UserAccessToken { get; set; }
         private String UserState { get; set; }
-        private String UserAccess { get;  set; }
-        private String UserCredits { get;  set; }
-        private String UserLevel { get;  set; }
+        private String UserAccess { get; set; }
+        private String UserCredits { get; set; }
+        private String UserLevel { get; set; }
         private String UserMana { get; set; }
-        private String UserHealth { get;  set; }
-        private String UserExp { get;  set; }
-        private String UsersXpos { get;  set; }
-        private String UsersYpos { get;  set; }
-        private String UsersZpos { get;  set; }
-        private String UsersXrot { get;  set; }
-        private String UsersYrot { get;  set; }
-        private String UsersZrot { get;  set; }
-        private String UserGpsX { get;  set; }
-        private String UserGpsY { get;  set; }
-        private String UserGpsZ { get;  set; }
-        private String FirstTimeLogin { get;  set; }
+        private String UserHealth { get; set; }
+        private String UserExp { get; set; }
+        private String UsersXpos { get; set; }
+        private String UsersYpos { get; set; }
+        private String UsersZpos { get; set; }
+        private String UsersXrot { get; set; }
+        private String UsersYrot { get; set; }
+        private String UsersZrot { get; set; }
+        private String UserGpsX { get; set; }
+        private String UserGpsY { get; set; }
+        private String UserGpsZ { get; set; }
+        private String FirstTimeLogin { get; set; }
+        private String UserDeviceId { get; set; }
+        private String UserIpAddress { get; set; }
+        private String UserAcctivation { get; set; }
 
 
 
-        public static List<Players> ConnectingClients = new List<Players>();
-        public static List<Players> ConnectedClients = new List<Players>();
+        public static List<Players> ConnectingClients= new List<Players>();
+        public static List<Players> ConnectedClients= new List<Players>();
+
+        private string _GetUserAcctivation()
+        {
+            return UserAcctivation;
+        }
+
+        public static string GetUserAcctivation()
+        {
+
+            return instance._GetUserAcctivation();
+        }
+
+        private void _SetUserAcctivation(string set)
+        {
+            UserAcctivation = set;
+        }
+
+        public static void SetUserAcctivation(string set)
+        {
+
+            instance.UserAcctivation = set;
+        }
+
+
+
+
+        private string _GetUserIpAddress()
+        {
+            return UserIpAddress;
+        }
+
+        public static string GetUserIpAddress()
+        {
+
+            return instance._GetUserIpAddress();
+        }
+
+        private void _SetUserIpAddress(string set)
+        {
+            UserIpAddress = set;
+        }
+
+        public static void SetUserIpAddress(string set)
+        {
+
+            instance.UserIpAddress = set;
+        }
+
+
+
+
+        private string _GetUserDeviceId()
+        {
+            return UserDeviceId;
+        }
+
+        public static string GetUserDeviceId()
+        {
+
+            return instance._GetUserDeviceId();
+        }
+
+        private void _SetUserDeviceId(string set)
+        {
+            UserDeviceId = set;
+        }
+
+        public static void SetUserDeviceId(string set)
+        {
+
+            instance.UserDeviceId = set;
+        }
+
+
 
 
         private string _GetFirstTimeLogin()
@@ -795,12 +885,12 @@ namespace TheServer
         }
 
 
-        public static bool InCommingConnetions = false;
+        public static int InCommingConnetions = 0;
 
         public static void CheckClientsData(Socket ClientSocket, string UserID, string AccessToken, string LoginStatus)
         {
             Debug.Starting("Clients: CheckClientsData()");
-            MySqlManager.LoadPlayersData(ClientSocket,UserID, AccessToken, LoginStatus);
+            MySqlManager.LoadPlayersData(ClientSocket, UserID, AccessToken, LoginStatus);
 
 
 
@@ -808,7 +898,7 @@ namespace TheServer
 
         }
 
-        public static void AddPlayers( string Id,
+        public static void AddPlayers(string Id,
    string UserId,
    string UserName,
    string UserPic,
@@ -831,7 +921,10 @@ namespace TheServer
    string UserGpsX,
   string UserGpsY,
   string UserGpsZ,
-  string FirstTimeLogin)
+  string FirstTimeLogin,
+  string UserDeviceId,
+  string UserIpAddress,
+  string UserAcctivation)
         {
 
 
@@ -859,12 +952,15 @@ namespace TheServer
     UserGpsX,
     UserGpsY,
     UserGpsZ,
-    FirstTimeLogin);
+    FirstTimeLogin,
+    UserDeviceId,
+    UserIpAddress,
+    UserAcctivation);
             if (ConnectedClients != null)
             {
                 for (int j = 0; j < ConnectedClients.Count; j++)
                 {
-
+                    Debug.Log("WHO IS CONNECTED: " + ConnectedClients[j].UserId);
                 }
             }
             if (ConnectingClients != null)
@@ -874,58 +970,35 @@ namespace TheServer
                     if (ConnectingClients[j].UserId == UserId)
                     {
                         Debug.Log("I AM ME: " + UserId);
+                        
 
-                        if (ConnectingClients[j].UserState == "1")
-                        {
-                            Debug.Log("I AM ME AND CONNECTED: " + UserId + "::" + UserState);
-                            if (InCommingConnetions == true)
-                            {
-                                ConnectedClients.Add(_player);
-                            }
-                        }
+                       
+                       
 
                     }
+                   
 
                 }
             }
 
 
-            if (InCommingConnetions == false)
+            
+
+            if (ConnectingClients != null && _player.UserState == "1")
             {
                 ConnectingClients.Add(_player);
-                InCommingConnetions = true;
             }
+            if (ConnectedClients != null && _player.UserState == "2")
+            {
+                //ConnectedClients.Add(_player);
+            }
+            
 
-            /*
-                     Id
-    UserId
-    UserName
-    UserPic
-    UserFirstName
-    UserLastName
-    UserAccessToken
-    UserState
-    UserAccess
-    UserCredits
-    UserLevel
-    UserMana
-    UserHealth
-    UserExp
-    UsersXpos
-    UsersYpos
-    UsersZpos
-    UsersXrot
-    UsersYrot
-    UsersZrot
-    UserGpsX
-    UserGpsY
-    UserGpsZ
-    FirstTimeLogin
 
-                     */
+
             foreach (Players players in ConnectingClients)
             {
-                Debug.Cleared("Id: " + players.Id);
+               /* Debug.Cleared("Id: " + players.Id);
 
                 Debug.Cleared("UserId: " + players.UserId);
                 Debug.Cleared("UserName: " + players.UserName);
@@ -951,13 +1024,26 @@ namespace TheServer
                 Debug.Cleared("UserGpsY: " + players.UserGpsY);
                 Debug.Cleared("UserGpsZ: " + players.UserGpsZ);
                 Debug.Cleared("FirstTimeLogin: " + players.FirstTimeLogin);
-                string data = "|ID|"+players.Id 
-                    +"|USERID|"+players.UserId;
+                Debug.Cleared("UserDeviceId: " + players.UserDeviceId);
+                Debug.Cleared("UserIpAddress: " + players.UserIpAddress);
+                Debug.Cleared("UserAcctivation: " + players.UserAcctivation);
+                string data = "|ID|" + players.Id
+                    + "|USERID|" + players.UserId;*/
                 //SEND THE DATA TO THE CLIENT
-                
-                   
-                
 
+
+
+
+            }
+
+
+            if (ConnectedClients != null)
+            {
+                Debug.Info("Clients Connected: " + ConnectedClients.Count);
+            }
+            if (ConnectingClients != null)
+            {
+                Debug.Info("Clients Connecting: " + ConnectingClients.Count);
             }
 
             Debug.Finished("Clients: AddPlayers()");

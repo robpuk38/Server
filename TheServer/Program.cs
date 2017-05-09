@@ -50,7 +50,24 @@ namespace TheServer
             {
                 Debug.Log("WE HAVE A AWAKE MESSAGE POSSIBILE NEW USER");
 
-                Network.OnSocketConnection(handler, data);
+                Network.OnSocketNewClientConnection(handler, data);
+                return;
+            }
+
+            if (data.Contains("Loggingin_" + blowfishkey))
+            {
+                Debug.Log("WE HAVE A LOGGING IN MESSAGE");
+
+                Network.OnSocketNewClientConnectionLogin(handler, data);
+                return;
+            }
+
+
+            if (data.Contains("Logged_" + blowfishkey))
+            {
+                Debug.Log("WE HAVE A LOGIN  MESSAGE");
+
+                Network.OnSocketNewClientConnectionLogin(handler, data);
                 return;
             }
 
@@ -71,7 +88,8 @@ namespace TheServer
 
         private static void Init()
         {
-            
+
+           
 
             MySqlManager.InitializeDB();
 
