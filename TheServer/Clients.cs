@@ -173,10 +173,10 @@ namespace TheServer
         private String UserDeviceId { get; set; }
         private String UserIpAddress { get; set; }
         private String UserAcctivation { get; set; }
+        private String UserAdsMod{ get; set; }
 
 
-
-        public static List<Players> ConnectingClients= new List<Players>();
+    public static List<Players> ConnectingClients= new List<Players>();
         public static List<Players> ConnectedClients= new List<Players>();
 
         private string _GetUserAcctivation()
@@ -787,8 +787,30 @@ namespace TheServer
 
 
 
+        
 
 
+        private string _GetUserAdsMod()
+        {
+            return UserAdsMod;
+        }
+
+        public static string GetUserAdsMod()
+        {
+
+            return instance._GetUserAdsMod();
+        }
+
+        private void _SetUserAdsMod(string set)
+        {
+            UserAdsMod = set;
+        }
+
+        public static void SetUserAdsMod(string set)
+        {
+
+            instance.UserAdsMod = set;
+        }
 
         private string _GetUserId()
         {
@@ -887,16 +909,16 @@ namespace TheServer
 
         public static int InCommingConnetions = 0;
 
-        public static void CheckClientsData(Socket ClientSocket, string UserID, string AccessToken, string LoginStatus)
+       /* public static void CheckClientsData(Socket ClientSocket, string UserID, string AccessToken, string LoginStatus)
         {
             Debug.Starting("Clients: CheckClientsData()");
-            MySqlManager.LoadPlayersData(ClientSocket, UserID, AccessToken, LoginStatus);
+           // MySqlManager.LoadPlayersData(ClientSocket, UserID, AccessToken, LoginStatus);
 
 
 
             Debug.Finished("Clients: CheckClientsData()");
 
-        }
+        }*/
 
         public static void AddPlayers(string Id,
    string UserId,

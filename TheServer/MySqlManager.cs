@@ -68,301 +68,135 @@ namespace TheServer
 
 
         }
-
-        public static void LoadPlayersData(Socket ClientSocket, string _UserId, string _AccessToken, string _LoginStatus)
+        public static void CheckClientsOnLoginData(Socket ClientSocket, string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ, string ClientFirstName ,string ClientUserId, string ClientAccessToken, string ClientPic, string ClientName, string ClientLastName, string ClientState, string ClientActivation)
         {
 
-            if (_LoginStatus == "0")
+            query = "SELECT * FROM clients WHERE UserDeviceId ='" + ClientDeviceId + "' LIMIT 1";
+            cmd = new MySqlCommand(query, dbConfig);
+
+            string data = "";
+
+            try
             {
 
-                // We only want to prep the database and store the information in memory for when they do log back in.
-                // so if loginstatus is 1 do nothing but the system is still in here trying to access something
-                //Debug.Starting("MySqlManager: LoadPlayersData()");
-                query = "SELECT * FROM clients WHERE UserId ='" + _UserId + "' AND UserAccessToken ='" + _AccessToken + "' LIMIT 1";
-                cmd = new MySqlCommand(query, dbConfig);
+                dbConfig.Open();
 
-
-
-                try
+                DataReader = cmd.ExecuteReader();
+                if (DataReader.Read())
                 {
-
-                    dbConfig.Open();
-
-                    DataReader = cmd.ExecuteReader();
-
-
-                    /*
-                     Id
-    UserId
-    UserName
-    UserPic
-    UserFirstName
-    UserLastName
-    UserAccessToken
-    UserState
-    UserAccess
-    UserCredits
-    UserLevel
-    UserMana
-    UserHealth
-    UserExp
-    UsersXpos
-    UsersYpos
-    UsersZpos
-    UsersXrot
-    UsersYrot
-    UsersZrot
-    UserGpsX
-    UserGpsY
-    UserGpsZ
-    FirstTimeLogin
-
-                     */
-
-                    if (DataReader.Read())
+                    Debug.Error("The client is a full member we have all the data to send back to the client");
+                    data = MyClientsTableDatatReader(DataReader);
+                    AddClientToList();
+                    dbConfig.Close();
+                    //Debug.Error("MY ID "+ ClientUserId);
+                    //Debug.Error("MY STATE " + ClientState);
+                    query = string.Format("UPDATE clients SET UserState='{0}' WHERE UserId = '{1}'", ClientState, ClientUserId);
+                    cmd = new MySqlCommand(query, dbConfig);
+                    try
                     {
+                        dbConfig.Open();
+                        cmd.ExecuteNonQuery();
+                        dbConfig.Close();
 
-                        String Id = DataReader["Id"].ToString();
-                        //Debug.Cleared("Id " + Id);
-
-                        String UserId = DataReader["UserId"].ToString();
-                        //Debug.Cleared("UserId " + UserId);
-
-                        String UserName = DataReader["UserName"].ToString();
-                        //Debug.Cleared("UserName " + UserName);
-
-                        String UserPic = DataReader["UserPic"].ToString();
-                        //Debug.Cleared("UserPic " + UserPic);
-
-                        String UserFirstName = DataReader["UserFirstName"].ToString();
-                        //Debug.Cleared("UserFirstName " + UserFirstName);
-
-                        String UserLastName = DataReader["UserLastName"].ToString();
-                        //Debug.Cleared("UserLastName " + UserLastName);
-
-                        String UserAccessToken = DataReader["UserAccessToken"].ToString();
-                        //Debug.Cleared("UserAccessToken " + UserAccessToken);
-
-                        String UserState = DataReader["UserState"].ToString();
-                        //Debug.Cleared("UserState " + UserState);
-
-                        //if (UserState == "0")
-                        //{
-                            //Debug.Cleared("UserState: CHANGE " + UserState);
-                          //  UserState = "1";
-                       // }
-
-                        String UserAccess = DataReader["UserAccess"].ToString();
-                        //Debug.Cleared("UserAccess " + UserAccess);
-
-                        String UserCredits = DataReader["UserCredits"].ToString();
-                        //Debug.Cleared("UserCredits " + UserCredits);
-
-                        String UserLevel = DataReader["UserLevel"].ToString();
-                        //Debug.Cleared("UserLevel " + UserLevel);
-
-                        String UserMana = DataReader["UserMana"].ToString();
-                        //Debug.Cleared("UserMana " + UserMana);
-
-                        String UserHealth = DataReader["UserHealth"].ToString();
-                        //Debug.Cleared("UserHealth " + UserHealth);
-
-                        String UserExp = DataReader["UserExp"].ToString();
-                        //Debug.Cleared("UserExp " + UserExp);
-
-                        String UsersXpos = DataReader["UsersXpos"].ToString();
-                        //Debug.Cleared("UsersXpos " + UsersXpos);
-
-                        String UsersYpos = DataReader["UsersYpos"].ToString();
-                        //Debug.Cleared("UsersYpos " + UsersYpos);
-
-                        String UsersZpos = DataReader["UsersZpos"].ToString();
-                        //Debug.Cleared("UsersZpos " + UsersZpos);
-
-                        String UsersXrot = DataReader["UsersXrot"].ToString();
-                        //Debug.Cleared("UsersXrot " + UsersXrot);
-
-                        String UsersYrot = DataReader["UsersYrot"].ToString();
-                        //Debug.Cleared("UsersYrot " + UsersYrot);
-
-                        String UsersZrot = DataReader["UsersZrot"].ToString();
-                        //Debug.Cleared("UsersZrot " + UsersZrot);
-
-                        String UserGpsX = DataReader["UserGpsX"].ToString();
-                        //Debug.Cleared("UserGpsX " + UserGpsX);
-
-                        String UserGpsY = DataReader["UserGpsY"].ToString();
-                        //Debug.Cleared("UserGpsY " + UserGpsY);
-
-                        String UserGpsZ = DataReader["UserGpsZ"].ToString();
-                        //Debug.Cleared("UserGpsZ " + UserGpsZ);
-
-                        String FirstTimeLogin = DataReader["FirstTimeLogin"].ToString();
-                        //Debug.Cleared("FirstTimeLogin " + FirstTimeLogin);
-
-                        String UserDeviceId = DataReader["UserDeviceId"].ToString();
-                        //Debug.Cleared("UserDeviceId " + UserDeviceId);
-
-                        String UserIpAddress = DataReader["UserIpAddress"].ToString();
-                        //Debug.Cleared("UserIpAddress " + UserIpAddress);
-
-                        String UserAcctivation = DataReader["UserAcctivation"].ToString();
-                        //Debug.Cleared("UserIpAddress " + UserAcctivation);
-
-                        string data = Contruct.ID + Id
-                            + Contruct.USERID + UserId
-                            + Contruct.USERNAME + UserName
-                            + Contruct.USERPIC  + UserPic
-                            + Contruct.USERFIRSTNAME  + UserFirstName
-                            + Contruct.USERLASTNAME  + UserLastName
-                            + Contruct.USERACCESSTOKEN  + UserAccessToken
-                            + Contruct.USERSTATE +"1"
-                            + Contruct.USERACCESS  + UserAccess
-                            + Contruct.USERCREDITS  + UserCredits
-                            + Contruct.USERLEVEL  + UserLevel
-                            + Contruct.USERMANA  + UserMana
-                            + Contruct.USERHEALTH  + UserHealth
-                            + Contruct.USEREXP  + UserExp
-                            + Contruct.USERXPOS  + UsersXpos
-                            + Contruct.USERYPOS  + UsersYpos
-                            + Contruct.USERZPOS  + UsersZpos
-                            + Contruct.USERXROT  + UsersXrot
-                            + Contruct.USERYROT  + UsersYrot
-                            + Contruct.USERZROT  + UsersZrot
-                            + Contruct.USERGPSX  + UserGpsX
-                            + Contruct.USERGPSY  + UserGpsY
-                            + Contruct.USERGPSZ  + UserGpsZ
-                            + Contruct.USERFIRSTTIMELOGIN  + FirstTimeLogin
-                            + Contruct.USERDEVICEID  + UserDeviceId
-                            + Contruct.USERIPADDRESS  + UserIpAddress
-                            + Contruct.USERACCTIVATION  + UserAcctivation;
-                        Clients.AddPlayers(
-                             Id,
-    UserId,
-    UserName,
-    UserPic,
-    UserFirstName,
-    UserLastName,
-    UserAccessToken,
-    UserState,
-    UserAccess,
-    UserCredits,
-    UserLevel,
-    UserMana,
-    UserHealth,
-    UserExp,
-    UsersXpos,
-    UsersYpos,
-    UsersZpos,
-    UsersXrot,
-    UsersYrot,
-    UsersZrot,
-    UserGpsX,
-    UserGpsY,
-    UserGpsZ,
-    FirstTimeLogin,
-    UserDeviceId,
-    UserIpAddress,
-    UserAcctivation
- );
-
-                        Program.SendData(ClientSocket, data);
 
                     }
-                    else
+                    catch (MySqlException Mex)
                     {
-                        dbConfig.Close();
-                        //Debug.Info("NO USER COULD BE FOUND CHECKING WITH OUT ACCESSTOKEN");
-
-
-                        query = "SELECT * FROM clients WHERE UserId ='" + _UserId + "' LIMIT 1";
-                        cmd = new MySqlCommand(query, dbConfig);
-                        try
-                        {
-                            dbConfig.Open();
-                            DataReader = cmd.ExecuteReader();
-                            if (DataReader.Read())
-                            {
-                                //Debug.Info("USER FOUND UPDATING ACCESS TOKEN ");
-                                dbConfig.Close();
-                                UpdateClientAccessToekn(ClientSocket, _UserId, _AccessToken, _LoginStatus);
-                                /*InsertNewUClient("1",
-                                    "uername", 
-                                    "pic",
-                                    "firstname", 
-                                    "lastname", 
-                                    "accesstocken", 
-                                    "userstate", 
-                                    "useraccess", 
-                                    "credits",
-                                    "level",
-                                    "mana",
-                                    "health",
-                                    "exp",
-                                    "xpos",
-                                    "ypos",
-                                    "zpos",
-                                    "xrot",
-                                    "yrot",
-                                    "zrot",
-                                    "gpsx",
-                                    "gpsy",
-                                    "gpsz",
-                                    "0",
-                                    "deviceid",
-                                    "ipaddress",
-                                    "0"
-                                    );*/
-                            }
-                            else
-                            {
-                                //Debug.Info("NO USER COULD BE FOUND SENDING NEW LOGIN MESSAGE");
-                                string data = "|NEWCLIENTWATINGLOGIN|";
-                                Program.SendData(ClientSocket, data);
-
-
-                            }
-
-                        }
-                        catch (MySqlException Mex)
-                        {
-                            //Debug.Error("Database Configeration Error: " + Mex.Message);
-                        }
-
-
-
+                        //Debug.Error("Mysql Update Client Exception " + Mex.Message);
                     }
                     dbConfig.Close();
-
                 }
-                catch (MySqlException Mex)
+                else
                 {
-                    //Debug.Error("Database Configeration Error: " + Mex.Message);
+                    // no client found lets insert the new data
+                    Debug.Error("CHECKING CLIENTS ID INSERTING INTO CLIENTS : ");
+                    dbConfig.Close();
+                    query = "SELECT * FROM clients WHERE UserId ='" + ClientUserId + "' LIMIT 1";
+                    cmd = new MySqlCommand(query, dbConfig);
+
+                    try
+                    {
+
+                        dbConfig.Open();
+
+                        DataReader = cmd.ExecuteReader();
+                        if (DataReader.Read())
+                        {
+                            //The client is already a member and found in the database with a user ID thye must be uing a new device lets update the information
+                            //Debug.Error("The client is already a member and found in the database with a user ID thye must be uing a new device lets update the information : ");
+                            // data = MyClientsTableDatatReader(DataReader);
+                            // AddClientToList();
+
+                            Debug.Error("THE USER WAS FOUND UPDATING NEW INFORMATION : ");
+                            UpdateClientDevice(ClientUserId, ClientAccessToken, ClientDeviceId, ClientIpAddress, ClientGpsX,ClientGpsY,ClientGpsZ, ClientCredits);
+                            dbConfig.Close();
+                        }
+                        else
+                        {
+                            dbConfig.Close();
+                            // ok this is a new client and its ok to insert the data
+                            InsertNewUClient(ClientUserId,
+   ClientName,
+   ClientPic,
+   ClientFirstName,
+    ClientLastName,
+   ClientAccessToken,
+   ClientState,
+    "0",
+   ClientCredits,
+    "1",
+    "100",
+    "100",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+   ClientGpsX,
+   ClientGpsY,
+   ClientGpsZ,
+   "0",
+   ClientDeviceId,
+   ClientIpAddress,
+   ClientActivation);
+                            dbConfig.Close();
+                        }
+                    }
+                    catch (MySqlException Mex)
+                    {
+                        //Debug.Error("Mysql Insert New Client Exception " + Mex.Message);
+                    }
+
+
+
+
+                    
                 }
-
-
-                //Debug.Finished("MySqlManager: LoadPlayersData()");
+            }
+            catch (MySqlException Mex)
+            {
+                //Debug.Error("Mysql Insert New Client Exception " + Mex.Message);
             }
 
-
-
-
-
+            Program.SendData(ClientSocket, data);
+            Program.Disconnected(ClientSocket);
 
         }
 
-
-        public static void UpdateClientAccessToekn(Socket ClientSocket, string _UserId, string _UserAccessToken, string _LoginStatus)
+        public static void CheckClientsOnLogoutData(Socket ClientSocket, string ClientUserId, string ClientState)
         {
-            //Debug.Starting("MySqlManager: UpdateClientData()");
-            query = string.Format("UPDATE clients SET UserAccessToken='{0}' WHERE UserId = '{1}'", _UserAccessToken, _UserId);
+
+            dbConfig.Close();
+            query = string.Format("UPDATE clients SET UserState='{0}' WHERE UserId = '{1}'", ClientState, ClientUserId);
             cmd = new MySqlCommand(query, dbConfig);
             try
             {
                 dbConfig.Open();
                 cmd.ExecuteNonQuery();
                 dbConfig.Close();
-                LoadPlayersData(ClientSocket, _UserId, _UserAccessToken, _LoginStatus);
+
 
             }
             catch (MySqlException Mex)
@@ -370,401 +204,21 @@ namespace TheServer
                 //Debug.Error("Mysql Update Client Exception " + Mex.Message);
             }
             dbConfig.Close();
-            //Debug.Finished("MySqlManager: UpdateClientData()");
-        }
 
-        public static void UpdateClientsPreloadData(Socket ClientSocket, string _DeviceId, string _ClientIp, string _ClientsCredits, string _ClientsGpsX, string _ClientsGpsY, string _ClientsGpsZ)
-        {
-            dbConfig.Close();
-            //Debug.Starting("MySqlManager: UpdateClientsPreloadData()");
-           
-            query = string.Format("UPDATE clients SET UserCredits='{0}',UserIpAddress='{1}',UserGpsX='{2}',UserGpsY='{3}',UserGpsZ='{4}' WHERE UserDeviceId = '{5}'", _ClientsCredits, _ClientIp, _ClientsGpsX, _ClientsGpsY, _ClientsGpsZ, _DeviceId);
-            cmd = new MySqlCommand(query, dbConfig);
-            try
-            {
-                dbConfig.Open();
-                cmd.ExecuteNonQuery();
-                dbConfig.Close();
-                
-
-            }
-            catch (MySqlException Mex)
-            {
-                //Debug.Error("Mysql Update Client Preloaded Exception " + Mex.Message);
-            }
-            dbConfig.Close();
-            //Debug.Finished("MySqlManager: UpdateClientsPreloadData()");
-        }
-
-
-
-        public static void UpdateClientsPreloadLoginData(Socket ClientSocket, string _DeviceId, string _ClientIp, string _ClientsCredits, string _ClientsGpsX, string _ClientsGpsY, string _ClientsGpsZ, string _ClientUserId, string _ClientFirstName, string _ClientLastName, string _ClientUserName, string _ClientAccessToken, string _ClientLoginStatus, string _ClientsPic)
-        {
-            dbConfig.Close();
-            //Debug.Starting("MySqlManager: UpdateClientsPreloadData()");
-
-            query = string.Format("UPDATE clients SET UserCredits='{0}'," +
-                "UserIpAddress='{1}'," +
-                "UserGpsX='{2}'," +
-                "UserGpsY='{3}'," +
-                "UserGpsZ='{4}'," +
-                "UserId='{5}'," +
-                "UserName='{6}'," +
-                "UserPic='{7}'," +
-                "UserFirstName= '{8}'," +
-                "UserLastName = '{9}'," +
-                "UserAccessToken = '{10}' WHERE UserDeviceId = '{11}'", _ClientsCredits, _ClientIp, _ClientsGpsX, _ClientsGpsY, _ClientsGpsZ, _ClientUserId, _ClientUserName, _ClientsPic, _ClientFirstName, _ClientLastName, _ClientAccessToken, _DeviceId);
-            cmd = new MySqlCommand(query, dbConfig);
-            try
-            {
-                dbConfig.Open();
-                cmd.ExecuteNonQuery();
-                dbConfig.Close();
-                
-
-            }
-            catch (MySqlException Mex)
-            {
-                //Debug.Error("Mysql Update Client Preloaded Exception " + Mex.Message);
-            }
-            dbConfig.Close();
-            //Debug.Finished("MySqlManager: UpdateClientsPreloadData()");
-        }
-
-
-        public static void CheckingClientsPreloadDataLogin(Socket ClientSocket, string _DeviceId, string _ClientIp, string _ClientsCredits, string _ClientsGpsX, string _ClientsGpsY, string _ClientsGpsZ ,string _ClientUserId , string _ClientFirstName ,string _ClientLastName , string _ClientUserName , string _ClientAccessToken, string _ClientLoginStatus, string _ClientsPic)
-        {
-            //Debug.Starting("MySqlManager: UpdateClientsPreloadDataLogin()");
-            dbConfig.Close();
-            string data = "";
-            query = "SELECT * FROM clients WHERE UserDeviceId ='" + _DeviceId + "' LIMIT 1";
-            cmd = new MySqlCommand(query, dbConfig);
-            try
-            {
-
-                dbConfig.Open();
-                DataReader = cmd.ExecuteReader();
-                if (DataReader.Read())
-                {
-
-                     //UPDATING THE DATA
-                  
-                    String Id = DataReader["Id"].ToString();
-                    //Debug.Cleared("Id " + Id);
-
-                    String UserId = DataReader["UserId"].ToString();
-                    //Debug.Cleared("UserId " + UserId);
-
-                    String UserName = DataReader["UserName"].ToString();
-                    //Debug.Cleared("UserName " + UserName);
-
-                    String UserPic = DataReader["UserPic"].ToString();
-                    //Debug.Cleared("UserPic " + UserPic);
-
-                    String UserFirstName = DataReader["UserFirstName"].ToString();
-                    //Debug.Cleared("UserFirstName " + UserFirstName);
-
-                    String UserLastName = DataReader["UserLastName"].ToString();
-                    //Debug.Cleared("UserLastName " + UserLastName);
-
-                    String UserAccessToken = DataReader["UserAccessToken"].ToString();
-                    //Debug.Cleared("UserAccessToken " + UserAccessToken);
-
-                    String UserState = DataReader["UserState"].ToString();
-                    //Debug.Cleared("UserState " + UserState);
-
-                  //  if (_ClientLoginStatus == "1")
-                   // {
-                        //Debug.Cleared("UserState: CHANGE " + UserState);
-                    //    UserState = "2";
-                   // }
-
-                    String UserAccess = DataReader["UserAccess"].ToString();
-                    //Debug.Cleared("UserAccess " + UserAccess);
-
-                    String UserCredits = DataReader["UserCredits"].ToString();
-                    //Debug.Cleared("UserCredits " + UserCredits);
-
-                    String UserLevel = DataReader["UserLevel"].ToString();
-                    //Debug.Cleared("UserLevel " + UserLevel);
-
-                    String UserMana = DataReader["UserMana"].ToString();
-                    //Debug.Cleared("UserMana " + UserMana);
-
-                    String UserHealth = DataReader["UserHealth"].ToString();
-                    //Debug.Cleared("UserHealth " + UserHealth);
-
-                    String UserExp = DataReader["UserExp"].ToString();
-                    //Debug.Cleared("UserExp " + UserExp);
-
-                    String UsersXpos = DataReader["UsersXpos"].ToString();
-                    //Debug.Cleared("UsersXpos " + UsersXpos);
-
-                    String UsersYpos = DataReader["UsersYpos"].ToString();
-                    //Debug.Cleared("UsersYpos " + UsersYpos);
-
-                    String UsersZpos = DataReader["UsersZpos"].ToString();
-                    //Debug.Cleared("UsersZpos " + UsersZpos);
-
-                    String UsersXrot = DataReader["UsersXrot"].ToString();
-                    //Debug.Cleared("UsersXrot " + UsersXrot);
-
-                    String UsersYrot = DataReader["UsersYrot"].ToString();
-                    //Debug.Cleared("UsersYrot " + UsersYrot);
-
-                    String UsersZrot = DataReader["UsersZrot"].ToString();
-                    //Debug.Cleared("UsersZrot " + UsersZrot);
-
-                    String UserGpsX = DataReader["UserGpsX"].ToString();
-                    //Debug.Cleared("UserGpsX " + UserGpsX);
-
-                    String UserGpsY = DataReader["UserGpsY"].ToString();
-                    //Debug.Cleared("UserGpsY " + UserGpsY);
-
-                    String UserGpsZ = DataReader["UserGpsZ"].ToString();
-                    //Debug.Cleared("UserGpsZ " + UserGpsZ);
-
-                    String FirstTimeLogin = DataReader["FirstTimeLogin"].ToString();
-                    //Debug.Cleared("FirstTimeLogin " + FirstTimeLogin);
-
-                    String UserDeviceId = DataReader["UserDeviceId"].ToString();
-                    //Debug.Cleared("UserDeviceId " + UserDeviceId);
-
-                    String UserIpAddress = DataReader["UserIpAddress"].ToString();
-                    //Debug.Cleared("UserIpAddress " + UserIpAddress);
-
-                    String UserAcctivation = DataReader["UserAcctivation"].ToString();
-                    //Debug.Cleared("UserIpAddress " + UserAcctivation);
-                    data = "|NEWCLIENTWATINGLOGIN|2" 
-                        + "|ANDROIDDEVICEID|" + _DeviceId
-                        + "|CLIENTSIPADDRESS|" + _ClientIp
-                        + "|USERCREDITS|" + UserCredits
-                        + "|USERGPSX|" + _ClientsGpsX
-                        + "|USERGPSY|" + _ClientsGpsY
-                        + "|USERGPSZ|" + _ClientsGpsZ
-                        + "|ID|" + Id
-                        + "|USERID|" + _ClientUserId
-                        + "|USERNAME|" + _ClientUserName
-                        + "|USERPIC|" + _ClientsPic
-                        + "|USERFIRSTNAME|" + _ClientFirstName
-                        + "|USERLASTNAME|" + _ClientLastName
-                        + "|USERACCESSTOKEN|" + _ClientAccessToken
-                        + "|USERSTATE|2";
-
-                    Program.SendData(ClientSocket, data);
-                    dbConfig.Close();
-                    Clients.AddPlayers(
-                            Id,
-   UserId,
-   UserName,
-   UserPic,
-   UserFirstName,
-   UserLastName,
-   UserAccessToken,
-   _ClientLoginStatus,
-   UserAccess,
-   UserCredits,
-   UserLevel,
-   UserMana,
-   UserHealth,
-   UserExp,
-   UsersXpos,
-   UsersYpos,
-   UsersZpos,
-   UsersXrot,
-   UsersYrot,
-   UsersZrot,
-   UserGpsX,
-   UserGpsY,
-   UserGpsZ,
-   FirstTimeLogin,
-   UserDeviceId,
-   UserIpAddress,
-   UserAcctivation
-);
-                    int incredits = 0;
-                    bool InClientsCredits = int.TryParse(_ClientsCredits, out incredits);
-                    int outcredits = 0;
-                    bool OutClientsCredits = int.TryParse(UserCredits, out outcredits);
-                    if (incredits > outcredits)
-                    {
-                        //Debug.Error("CREDITS ARE BIG UPDATE NOW");
-                        UpdateClientsPreloadLoginData(ClientSocket, _DeviceId, _ClientIp, _ClientsCredits, _ClientsGpsX, _ClientsGpsY, _ClientsGpsZ, _ClientUserId, _ClientFirstName, _ClientLastName, _ClientUserName, _ClientAccessToken, _ClientLoginStatus, _ClientsPic);
-
-                    }
-                    else
-                    {
-                        UpdateClientsPreloadLoginData(ClientSocket, _DeviceId, _ClientIp, UserCredits, _ClientsGpsX, _ClientsGpsY, _ClientsGpsZ, _ClientUserId, _ClientFirstName, _ClientLastName, _ClientUserName, _ClientAccessToken, _ClientLoginStatus, _ClientsPic);
-                    }
-                }
-                else
-                {
-                    //Debug.Error("NOTHING WAS FOUND");
-                }
-            }
-            catch (MySqlException Mex)
-            {
-                //Debug.Error("Mysql Check Client Preload Exception " + Mex.Message);
-            }
-            dbConfig.Close();
-            //Debug.Finished("MySqlManager: UpdateClientsPreloadDataLogin()");
-        }
-
-        public static void CheckClientsPreloadData(Socket ClientSocket, string _DeviceId, string _ClientIp, string _ClientsCredits, string _ClientsGpsX, string _ClientsGpsY, string _ClientsGpsZ)
-        {
-            //Debug.Starting("MySqlManager: CheckClientsPreloadData()");
-            dbConfig.Close();
-            //Debug.Info("PRELOADING CLIENTS DATA CHECKING");
-
-            string data = "";
-            query = "SELECT * FROM clients WHERE UserDeviceId ='" + _DeviceId + "' LIMIT 1";
-            cmd = new MySqlCommand(query, dbConfig);
-            try
-            {
-               
-                dbConfig.Open();
-                DataReader = cmd.ExecuteReader();
-                if (DataReader.Read())
-                {
-                    //Debug.Info("USER FOUND SENDING THE DATA WE HAVE ");
-                    String Id = DataReader["Id"].ToString();
-                    String UserDeviceId = DataReader["UserDeviceId"].ToString();
-                    String UserIpAddress = DataReader["UserIpAddress"].ToString();
-                    String UserGpsX = DataReader["UserGpsX"].ToString();
-                    String UserGpsY = DataReader["UserGpsY"].ToString();
-                    String UserGpsZ = DataReader["UserGpsZ"].ToString();
-                    String UserCredits = DataReader["UserCredits"].ToString();
-                    
-                    data = "|NEWCLIENTWATINGLOGIN|2" + "|ANDROIDDEVICEID|" + UserDeviceId + "|CLIENTSIPADDRESS|" + UserIpAddress + "|USERCREDITS|" + UserCredits + "|USERGPSX|" + UserGpsX + "|USERGPSY|" + UserGpsY + "|USERGPSZ|" + UserGpsZ+"|ID|"+ Id;
-                    Program.SendData(ClientSocket, data);
-                    // UPDATING THE DATA COMMING IN
-
-                    // do not update yet
-                    int incredits = 0 ;
-                    bool InClientsCredits = int.TryParse(_ClientsCredits, out incredits);
-                    int outcredits = 0;
-                    bool OutClientsCredits = int.TryParse(UserCredits, out outcredits);
-                    if (incredits > outcredits)
-                    {
-                        //Debug.Error("CREDITS ARE BIG UPDATE NOW");
-                        UpdateClientsPreloadData(ClientSocket, _DeviceId, _ClientIp, _ClientsCredits, _ClientsGpsX, _ClientsGpsY, _ClientsGpsZ);
-                    }
-                    
-
-                    dbConfig.Close();
-                }
-                else
-                {
-                    //Debug.Info("NO DATA FOUND INSERTING PRELOADED DATA ");
-                    InsertClientsPreloadedData( ClientSocket,  _DeviceId,  _ClientIp,  _ClientsCredits,  _ClientsGpsX,  _ClientsGpsY,  _ClientsGpsZ);
-                    
-                }
-            }
-            catch (MySqlException Mex)
-            {
-                //Debug.Error("Mysql Check Client Preload Exception " + Mex.Message);
-            }
-            dbConfig.Close();
-            //Debug.Finished("MySqlManager: CheckClientsPreloadData()");
-        }
-
-        public static void InsertClientsPreloadedData(Socket ClientSocket, string _DeviceId, string _ClientIp, string _ClientsCredits, string _ClientsGpsX, string _ClientsGpsY, string _ClientsGpsZ)
-        {
-
-            //Debug.Starting("MySqlManager: InsertClientsPreloadedData()");
-            string data = "";
-            dbConfig.Close();
-            query = string.Format("INSERT INTO clients(UserDeviceId, " +
-                "UserIpAddress, " +
-                "UserCredits, " +
-                "UserGpsX, " +
-                "UserGpsY," +
-                "UserGpsZ) VALUES ('{0}'," +
-                "'{1}'," +
-                "'{2}'," +
-                "'{3}'," +
-                "'{4}'," +
-                "'{5}')", _DeviceId,
-    _ClientIp,
-    _ClientsCredits,
-    _ClientsGpsX,
-    _ClientsGpsY,
-    _ClientsGpsZ);
-            cmd = new MySqlCommand(query, dbConfig);
-            try
-            {
-                dbConfig.Open();
-                cmd.ExecuteNonQuery();
-                data = "|NEWCLIENTWATINGLOGIN|1"+"|ANDROIDDEVICEID|"+ _DeviceId+ "|CLIENTSIPADDRESS|"+ _ClientIp+ "|USERCREDITS|"+ _ClientsCredits+ "|USERGPSX|"+ _ClientsGpsX+ "|USERGPSY|" + _ClientsGpsY+ "|USERGPSZ|"+ _ClientsGpsZ;
-                Program.SendData(ClientSocket, data);
-            }
-            catch (MySqlException Mex)
-            {
-                //Debug.Error("Mysql Insert New Client Exception " + Mex.Message);
-            }
-            dbConfig.Close();
-            //Debug.Finished("MySqlManager: InsertClientsPreloadedData()");
+           string data = Construct.USERID + ClientUserId
+                       + Construct.USERSTATE + ClientState;
+            Program.SendData(ClientSocket, data);
+            Program.Disconnected(ClientSocket);
 
         }
 
-        public static void InsertNewUClient(string _UserId,
-    string _UserName,
-    string _UserPic,
-    string _UserFirstName,
-    string _UserLastName,
-    string _UserAccessToken,
-    string _UserState,
-    string _UserAccess,
-    string _UserCredits,
-    string _UserLevel,
-    string _UserMana,
-    string _UserHealth,
-    string _UserExp,
-    string _UsersXpos,
-    string _UsersYpos,
-    string _UsersZpos,
-    string _UsersXrot,
-    string _UsersYrot,
-    string _UsersZrot,
-    string _UserGpsX,
-    string _UserGpsY,
-    string _UserGpsZ,
-    string _FirstTimeLogin,
-    string _UserDeviceId,
-    string _UserIpAddress,
-    string _UserAcctivation
 
-
-            )
+        public static void InsertNewUClient(string _UserId,string _UserName,string _UserPic,string _UserFirstName,string _UserLastName, string _UserAccessToken, string _UserState, string _UserAccess, string _UserCredits, string _UserLevel, string _UserMana, string _UserHealth, string _UserExp, string _UsersXpos, string _UsersYpos, string _UsersZpos, string _UsersXrot, string _UsersYrot, string _UsersZrot, string _UserGpsX,string _UserGpsY, string _UserGpsZ, string _FirstTimeLogin, string _UserDeviceId,string _UserIpAddress,string _UserAcctivation)
         {
-            /*
-              UserId
-    UserName
-    UserPic
-    UserFirstName
-    UserLastName
-    UserAccessToken
-    UserState
-    UserAccess
-    UserCredits
-    UserLevel
-    UserMana
-    UserHealth
-    UserExp
-    UsersXpos
-    UsersYpos
-    UsersZpos
-    UsersXrot
-    UsersYrot
-    UsersZrot
-    UserGpsX
-    UserGpsY
-    UserGpsZ
-    FirstTimeLogin
-             */
+
             //Debug.Starting("MySqlManager: InsertNewUClient()");
 
-
+            dbConfig.Close();
             query = string.Format("INSERT INTO clients(UserId, " +
                 "UserName, " +
                 "UserPic, " +
@@ -778,19 +232,19 @@ namespace TheServer
                 "UserMana," +
                 "UserHealth," +
                 "UserExp," +
-                "UsersXpos," +
-                "UsersYpos," +
-                "UsersZpos," +
-                "UsersXrot," +
-                "UsersYrot," +
-                "UsersZrot," +
+                "UserXpos," +
+                "UserYpos," +
+                "UserZpos," +
+                "UserXrot," +
+                "UserYrot," +
+                "UserZrot," +
                 "UserGpsX," +
                 "UserGpsY," +
                 "UserGpsZ," +
-                "FirstTimeLogin," +
+                "UserFirstTimeLogin," +
                 "UserDeviceId," +
                 "UserIpAddress," +
-                "UserAcctivation) VALUES ('{0}'," +
+                "UserActivation) VALUES ('{0}'," +
                 "'{1}'," +
                 "'{2}'," +
                 "'{3}'," +
@@ -812,10 +266,10 @@ namespace TheServer
                 "'{19}'," +
                 "'{20}'," +
                 "'{21}'," +
-                "'(22)'," +
-                "'(23)'," +
-                "'(24)'," +
-                "'(25)')", _UserId,
+                "'{22}'," +
+                "'{23}'," +
+                "'{24}'," +
+                "'{25}')", _UserId,
     _UserName,
     _UserPic,
     _UserFirstName,
@@ -846,6 +300,8 @@ namespace TheServer
             {
                 dbConfig.Open();
                 cmd.ExecuteNonQuery();
+                dbConfig.Close();
+                UpdatingIntoClientsTempTable(_UserDeviceId, _UserIpAddress, _UserCredits, _UserGpsX, _UserGpsY, _UserGpsZ, _UserId);
 
             }
             catch (MySqlException Mex)
@@ -856,8 +312,532 @@ namespace TheServer
             //Debug.Finished("MySqlManager: InsertNewUClient()");
         }
 
+        private static string MyClientsTableDatatReader(MySqlDataReader DataReader)
+        {
 
-        public static void LoadAllMessage()
+
+            //The client is a full member we have all the data to send back to the client
+            String Id = DataReader["Id"].ToString();
+            //Debug.Cleared("Id " + Id);
+            Clients.SetId(Id);
+
+            String UserId = DataReader["UserId"].ToString();
+            //Debug.Cleared("UserId " + UserId);
+            Clients.SetUserId(UserId);
+
+            String UserName = DataReader["UserName"].ToString();
+            //Debug.Cleared("UserName " + UserName);
+            Clients.SetUserName(UserName);
+
+            String UserPic = DataReader["UserPic"].ToString();
+            //Debug.Cleared("UserPic " + UserPic);
+            Clients.SetUserPic(UserPic);
+
+            String UserFirstName = DataReader["UserFirstName"].ToString();
+            //Debug.Cleared("UserFirstName " + UserFirstName);
+            Clients.SetUserLastName(UserFirstName);
+
+            String UserLastName = DataReader["UserLastName"].ToString();
+            //Debug.Cleared("UserLastName " + UserLastName);
+            Clients.SetUserLastName(UserLastName);
+
+            String UserAccessToken = DataReader["UserAccessToken"].ToString();
+            //Debug.Cleared("UserAccessToken " + UserAccessToken);
+            Clients.SetUserAccessToken(UserAccessToken);
+
+            String UserState = DataReader["UserState"].ToString();
+            Clients.SetUserState(UserState);
+            //Debug.Cleared("UserState " + UserState);
+
+            //if (UserState == "0")
+            //{
+            //Debug.Cleared("UserState: CHANGE " + UserState);
+            //  UserState = "1";
+            // }
+
+            String UserAccess = DataReader["UserAccess"].ToString();
+            Clients.SetUserAccess(UserAccess);
+            //Debug.Cleared("UserAccess " + UserAccess);
+
+            String UserCredits = DataReader["UserCredits"].ToString();
+            Clients.SetUserCredits(UserCredits);
+            //Debug.Cleared("UserCredits " + UserCredits);
+
+            String UserLevel = DataReader["UserLevel"].ToString();
+            Clients.SetUserLevel(UserLevel);
+            //Debug.Cleared("UserLevel " + UserLevel);
+
+            String UserMana = DataReader["UserMana"].ToString();
+            //Debug.Cleared("UserMana " + UserMana);
+            Clients.SetUserMana(UserMana);
+
+            String UserHealth = DataReader["UserHealth"].ToString();
+            //Debug.Cleared("UserHealth " + UserHealth);
+            Clients.SetUserHealth(UserHealth);
+
+            String UserExp = DataReader["UserExp"].ToString();
+            //Debug.Cleared("UserExp " + UserExp);
+            Clients.SetUserExp(UserExp);
+
+            String UsersXpos = DataReader["UserXpos"].ToString();
+            //Debug.Cleared("UsersXpos " + UsersXpos);
+            Clients.SetUsersXpos(UsersXpos);
+
+            String UsersYpos = DataReader["UserYpos"].ToString();
+            //Debug.Cleared("UsersYpos " + UsersYpos);
+            Clients.SetUsersYpos(UsersYpos);
+
+            String UsersZpos = DataReader["UserZpos"].ToString();
+            //Debug.Cleared("UsersZpos " + UsersZpos);
+            Clients.SetUsersZpos(UsersZpos);
+
+            String UsersXrot = DataReader["UserXrot"].ToString();
+            //Debug.Cleared("UsersXrot " + UsersXrot);
+            Clients.SetUsersXrot(UsersXrot);
+
+            String UsersYrot = DataReader["UserYrot"].ToString();
+            //Debug.Cleared("UsersYrot " + UsersYrot);
+            Clients.SetUsersYrot(UsersYrot);
+
+            String UsersZrot = DataReader["UserZrot"].ToString();
+            //Debug.Cleared("UsersZrot " + UsersZrot);
+            Clients.SetUsersZrot(UsersZrot);
+
+            String UserGpsX = DataReader["UserGpsX"].ToString();
+            //Debug.Cleared("UserGpsX " + UserGpsX);
+            Clients.SetUserGpsX(UserGpsX);
+
+            String UserGpsY = DataReader["UserGpsY"].ToString();
+            //Debug.Cleared("UserGpsY " + UserGpsY);
+            Clients.SetUserGpsY(UserGpsY);
+
+            String UserGpsZ = DataReader["UserGpsZ"].ToString();
+            //Debug.Cleared("UserGpsZ " + UserGpsZ);
+            Clients.SetUserGpsZ(UserGpsZ);
+
+            String UserFirstTimeLogin = DataReader["UserFirstTimeLogin"].ToString();
+            //Debug.Cleared("FirstTimeLogin " + FirstTimeLogin);
+            Clients.SetFirstTimeLogin(UserFirstTimeLogin);
+
+            String UserDeviceId = DataReader["UserDeviceId"].ToString();
+            //Debug.Cleared("UserDeviceId " + UserDeviceId);
+            Clients.SetUserDeviceId(UserDeviceId);
+
+            String UserIpAddress = DataReader["UserIpAddress"].ToString();
+            //Debug.Cleared("UserIpAddress " + UserIpAddress);
+            Clients.SetUserIpAddress(UserIpAddress);
+
+            String UserActivation = DataReader["UserActivation"].ToString();
+            //Debug.Cleared("UserIpAddress " + UserAcctivation);
+            Clients.SetUserAcctivation(UserActivation);
+
+           string data = Construct.ID + Id
+               + Construct.USERID + UserId
+               + Construct.USERNAME + UserName
+               + Construct.USERPIC + UserPic
+               + Construct.USERFIRSTNAME + UserFirstName
+               + Construct.USERLASTNAME + UserLastName
+               + Construct.USERACCESSTOKEN + UserAccessToken
+               + Construct.USERSTATE + "1"
+               + Construct.USERACCESS + UserAccess
+               + Construct.USERCREDITS + UserCredits
+               + Construct.USERLEVEL + UserLevel
+               + Construct.USERMANA + UserMana
+               + Construct.USERHEALTH + UserHealth
+               + Construct.USEREXP + UserExp
+               + Construct.USERXPOS + UsersXpos
+               + Construct.USERYPOS + UsersYpos
+               + Construct.USERZPOS + UsersZpos
+               + Construct.USERXROT + UsersXrot
+               + Construct.USERYROT + UsersYrot
+               + Construct.USERZROT + UsersZrot
+               + Construct.USERGPSX + UserGpsX
+               + Construct.USERGPSY + UserGpsY
+               + Construct.USERGPSZ + UserGpsZ
+               + Construct.USERFIRSTTIMELOGIN + UserFirstTimeLogin
+               + Construct.USERDEVICEID + UserDeviceId
+               + Construct.USERIPADDRESS + UserIpAddress
+               + Construct.USERACTIVATION + UserActivation;
+           
+            return data;
+        }
+
+        private static void AddClientToList()
+        {
+            Clients.AddPlayers(
+                   Clients.GetId(),
+Clients.GetUserId(),
+Clients.GetUserName(),
+Clients.GetUserPic(),
+Clients.GetUserFirstName(),
+Clients.GetUserLastName(),
+Clients.GetUserAccessToken(),
+Clients.GetUserState(),
+Clients.GetUserAccess(),
+Clients.GetUserCredits(),
+Clients.GetUserLevel(),
+Clients.GetUserMana(),
+Clients.GetUserHealth(),
+Clients.GetUserExp(),
+Clients.GetUsersXpos(),
+Clients.GetUsersYpos(),
+Clients.GetUsersZpos(),
+Clients.GetUsersXrot(),
+Clients.GetUsersYrot(),
+Clients.GetUsersZrot(),
+Clients.GetUserGpsX(),
+Clients.GetUserGpsY(),
+Clients.GetUserGpsZ(),
+Clients.GetFirstTimeLogin(),
+Clients.GetUserDeviceId(),
+Clients.GetUserIpAddress(),
+Clients.GetUserAcctivation()
+);
+        }
+
+        public static void CheckClientsOnAdsData(Socket ClientSocket, string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ,string ClientUserId, string ClientModType, string ClientState)
+        {
+
+
+            query = "SELECT * FROM clients WHERE UserDeviceId ='" + ClientDeviceId + "' LIMIT 1";
+            cmd = new MySqlCommand(query, dbConfig);
+
+            string data = "";
+
+            try
+            {
+
+                dbConfig.Open();
+
+                DataReader = cmd.ExecuteReader();
+                if (DataReader.Read())
+                {
+
+                    //The user is found in the clitns table so we want to update the clients table where users new credits are
+                    String UserDeviceId = DataReader["UserDeviceId"].ToString();
+                    //Debug.Cleared("UserDeviceId " + UserDeviceId);
+                   
+
+                    String UserIpAddress = DataReader["UserIpAddress"].ToString();
+                    String UserCredits = DataReader["UserCredits"].ToString();
+                    
+                    //Debug.Info("The user is found in the clitns table so we want to update the clients table where users new credits are ");
+
+                    if (ClientModType == "1")
+                    {
+                        //Debug.Info("UPDATING THE CLIENTS MODIFYED CREDITS CLIENT");
+
+
+                        UpdatingIntoClientsTable(ClientDeviceId, ClientIpAddress, ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId);
+                    }
+                    else if (ClientModType == "0")
+                    {
+                        //Debug.Info("UPDATING THE CLIENTS MODIFYED CREDITS SERVER");
+                        ClientDeviceId = UserDeviceId;
+                        ClientIpAddress = UserIpAddress;
+                        ClientCredits = UserCredits;
+                    }
+
+                    dbConfig.Close();
+
+
+
+                }
+                else
+                {
+
+                    
+                    // else the user is not a full member so we want to check if they are located in the clients temp table to store the new information comming in
+                    dbConfig.Close();
+                    query = "SELECT * FROM clients_temp WHERE UserDeviceId ='" + ClientDeviceId + "' LIMIT 1";
+                    cmd = new MySqlCommand(query, dbConfig);
+                    try
+                    {
+
+                        dbConfig.Open();
+                        DataReader = cmd.ExecuteReader();
+                        if (DataReader.Read())
+                        {
+                            //the client was found so we want to update the credits table for the temp client
+                            String UserDeviceId = DataReader["UserDeviceId"].ToString();
+                            //Debug.Cleared("UserDeviceId " + UserDeviceId);
+
+
+                            String UserIpAddress = DataReader["UserIpAddress"].ToString();
+                            String UserCredits = DataReader["UserCredits"].ToString();
+                            String UserId = DataReader["UserId"].ToString();
+
+                            if(UserId != Construct._USERID)
+                            {
+                                //Debug.Error("THIS MEMEBR IS ALREADY A FULL MEMBER THEY MUST HAVE LOGGIN WITH SOME OTHER DEVICE");
+                                dbConfig.Close();
+
+                                query = "SELECT * FROM clients WHERE UserId ='" + UserId + "' LIMIT 1";
+                                cmd = new MySqlCommand(query, dbConfig);
+                                try
+                                {
+                                    dbConfig.Open();
+                                    DataReader = cmd.ExecuteReader();
+                                    if (DataReader.Read())
+                                    {
+                                        //Debug.Error("THIS MEMEBR IS ALREADY A FULL MEMBER THEY MUST HAVE LOGGIN WITH SOME OTHER DEVICE GETTING THE NEW DATA");
+                                        UserDeviceId = DataReader["UserDeviceId"].ToString();
+                                        //Debug.Cleared("UserDeviceId " + UserDeviceId);
+
+
+                                        UserIpAddress = DataReader["UserIpAddress"].ToString();
+                                        UserCredits = DataReader["UserCredits"].ToString();
+                                    }
+                                }
+                                catch (MySqlException Mex)
+                                {
+                                    //Debug.Error("Database Configeration Error: " + Mex.Message);
+                                }
+
+                                dbConfig.Close();
+                                
+                            }
+
+
+                            if (ClientModType == "1")
+                            {
+                                //Debug.Info("UPDATING THE CLIENTS MODIFYED CREDITS CLIENT TEMP");
+                                UpdatingIntoClientsTempTable(ClientDeviceId, ClientIpAddress, ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId);
+                            }
+                            else if (ClientModType == "0")
+                            {
+                                //Debug.Info("UPDATING THE CLIENTS MODIFYED CREDITS SERVER TEMP");
+                                ClientDeviceId = UserDeviceId;
+                                ClientIpAddress = UserIpAddress;
+                                ClientCredits = UserCredits;
+                            }
+                            
+                            
+
+                           
+                            dbConfig.Close();
+                        }
+                        else
+                        {
+
+                            //the client has never been here with any knowen devices that we know of
+                            //Debug.Error("INSERTING INTO CLIENTS TEMP : ");
+
+                            InsertingIntoClientsTempTable(ClientDeviceId, ClientIpAddress, ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ);
+
+
+
+
+                            
+                            dbConfig.Close();
+
+                        }
+                    }
+                    catch (MySqlException Mex)
+                    {
+                        //Debug.Error("Database Configeration Error: " + Mex.Message);
+                    }
+
+
+                }
+            }
+            catch (MySqlException Mex)
+            {
+                //Debug.Error("Database Configeration Error: " + Mex.Message);
+            }
+            data = Construct.USERDEVICEID + ClientDeviceId
+                        + Construct.USERIPADDRESS + ClientIpAddress
+                        + Construct.USERCREDITS + ClientCredits
+                        + Construct.USERSTATE + ClientState;
+            Program.SendData(ClientSocket, data);
+            Program.Disconnected(ClientSocket);
+        }
+
+        public static void InsertingIntoClientsTempTable( string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ)
+        {
+
+            dbConfig.Close();
+            query = string.Format("INSERT INTO clients_temp(UserDeviceId, " +
+                "UserIpAddress, " +
+                "UserCredits, " +
+                "UserGpsX, " +
+                "UserGpsY," +
+                "UserGpsZ) VALUES ('{0}'," +
+                "'{1}'," +
+                "'{2}'," +
+                "'{3}'," +
+                "'{4}'," +
+                "'{5}')", ClientDeviceId,
+    ClientIpAddress,
+    ClientCredits,
+    ClientGpsX,
+    ClientGpsY,
+    ClientGpsZ);
+            cmd = new MySqlCommand(query, dbConfig);
+            try
+            {
+                dbConfig.Open();
+                cmd.ExecuteNonQuery();
+
+            }
+            catch (MySqlException Mex)
+            {
+                //Debug.Error("Mysql Insert New Client Exception " + Mex.Message);
+            }
+
+            //Debug.Finished("MySqlManager: InsertClientsPreloadedData()");
+            dbConfig.Close();
+        }
+
+        public static void UpdateClientDevice(string ClientUserId, string ClientAccessToken, string ClientDeviceId, string ClientIpAddress, string ClientGpsX, string ClientGpsY, string ClientGpsZ, string ClientCredits)
+        {
+            dbConfig.Close();
+            query = string.Format("UPDATE clients SET UserAccessToken='{0}',UserGpsX='{1}',UserGpsY='{2}',UserGpsZ='{3}',UserDeviceId='{4}',UserIpAddress='{5}' WHERE UserId = '{6}'", ClientAccessToken, ClientGpsX, ClientGpsY, ClientGpsZ, ClientDeviceId, ClientIpAddress, ClientUserId);
+            cmd = new MySqlCommand(query, dbConfig);
+            try
+            {
+                dbConfig.Open();
+                cmd.ExecuteNonQuery();
+                UpdatingIntoClientsTempTable(ClientDeviceId, ClientIpAddress, ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId);
+                dbConfig.Close();
+
+
+            }
+            catch (MySqlException Mex)
+            {
+                //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+            }
+            dbConfig.Close();
+        }
+
+        public static void UpdatingIntoClientsTable(string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ,string ClientUserId)
+        {
+            //Debug.Starting("MySqlManager: UpdateClientData()");
+            dbConfig.Close();
+            query = string.Format("UPDATE clients SET UserCredits='{0}',UserGpsX='{1}',UserGpsY='{2}',UserGpsZ='{3}',UserId='{4}' WHERE UserDeviceId = '{5}'", ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId, ClientDeviceId);
+            cmd = new MySqlCommand(query, dbConfig);
+            try
+            {
+                dbConfig.Open();
+                cmd.ExecuteNonQuery();
+                dbConfig.Close();
+                UpdatingIntoClientsTempTable(ClientDeviceId, ClientIpAddress, ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId);
+
+            }
+            catch (MySqlException Mex)
+            {
+                //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+            }
+            dbConfig.Close();
+            //Debug.Finished("MySqlManager: UpdateClientData()");
+        }
+
+        public static void UpdatingIntoClientsTempTable(string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ, string ClientUserId)
+        {
+            //Debug.Starting("MySqlManager: UpdateClientData()");
+            dbConfig.Close();
+            query = string.Format("UPDATE clients_temp SET UserCredits='{0}',UserGpsX='{1}',UserGpsY='{2}',UserGpsZ='{3}',UserId='{4}' WHERE UserDeviceId = '{5}'", ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId, ClientDeviceId);
+            cmd = new MySqlCommand(query, dbConfig);
+            try
+            {
+                dbConfig.Open();
+                cmd.ExecuteNonQuery();
+                dbConfig.Close();
+                
+
+            }
+            catch (MySqlException Mex)
+            {
+                //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+            }
+            dbConfig.Close();
+            //Debug.Finished("MySqlManager: UpdateClientData()");
+        }
+
+        public static void CheckClientsOnAwakeData(Socket ClientSocket, string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ)
+        {
+
+
+            query = "SELECT * FROM clients WHERE UserDeviceId ='" + ClientDeviceId + "' LIMIT 1";
+            cmd = new MySqlCommand(query, dbConfig);
+
+            string data = "";
+
+            try
+            {
+
+                dbConfig.Open();
+
+                DataReader = cmd.ExecuteReader();
+                if (DataReader.Read())
+                {
+
+                  data = MyClientsTableDatatReader(DataReader);
+                    //AddClientToList();
+                    dbConfig.Close();
+                }
+                else
+                {
+                    dbConfig.Close();
+                    query = "SELECT * FROM clients_temp WHERE UserDeviceId ='" + ClientDeviceId + "' LIMIT 1";
+                    cmd = new MySqlCommand(query, dbConfig);
+                    try
+                    {
+
+                        dbConfig.Open();
+                        DataReader = cmd.ExecuteReader();
+                        if (DataReader.Read())
+                        {
+                            //the client is a temp meber we do not have all the data but we have enough to know them from there device so we can send back the info we stored
+                            String Id = DataReader["Id"].ToString();
+                            //Debug.Cleared("Id " + Id);
+                            ClientCredits = DataReader["UserCredits"].ToString();
+                            //Debug.Cleared("ClientCredits " + ClientCredits);
+                            data = Construct.USERDEVICEID + ClientDeviceId
+                         + Construct.USERIPADDRESS + ClientIpAddress
+                         + Construct.USERCREDITS + ClientCredits;
+                            dbConfig.Close();
+                        }
+                        else
+                        {
+
+                            //the client has never been here with any knowen devices that we know of
+                            //Debug.Error("INSERTING INTO CLIENTS TEMP : ");
+
+                            InsertingIntoClientsTempTable( ClientDeviceId,  ClientIpAddress,  ClientCredits,  ClientGpsX, ClientGpsY, ClientGpsZ);
+
+                            
+
+                           
+                             data = Construct.USERDEVICEID + ClientDeviceId
+                         + Construct.USERIPADDRESS + ClientIpAddress
+                         + Construct.USERCREDITS + ClientCredits;
+                            dbConfig.Close();
+
+                        }
+                    }
+                    catch (MySqlException Mex)
+                    {
+                        //Debug.Error("Database Configeration Error: " + Mex.Message);
+                    }
+
+                    
+                }
+            }
+            catch (MySqlException Mex)
+            {
+                //Debug.Error("Database Configeration Error: " + Mex.Message);
+            }
+            
+            Program.SendData(ClientSocket, data);
+            Program.Disconnected(ClientSocket);
+        }
+
+
+
+        
+
+        /*public static void LoadAllMessage()
         {
             //Debug.Starting("MySqlManager: LoadAllMessage()");
             List<MySqlManager> Messages = MySqlManager.GetMessage();
@@ -865,56 +845,56 @@ namespace TheServer
             foreach (MySqlManager Mess in Messages)
             {
 
-                /*Debug.Cleared(
+                Debug.Cleared(
                     "ID: " + Mess.Id.ToString() +
                     " FromUserID: " + Mess.FromUserId.ToString() +
                     " ToUserID: " + Mess.ToUserId.ToString() +
                     " Message: " + Mess.Message.ToString() +
-                    " Recieved: " + Mess.received.ToString());*/
+                    " Recieved: " + Mess.received.ToString());
 
-            }
-            //Debug.Finished("MySqlManager: LoadAllMessage()");
+        }
+        Debug.Finished("MySqlManager: LoadAllMessage()");
         }
 
-        public static List<MySqlManager> GetMessage()
-        {
-            //Debug.Starting("MySqlManager: GetMessage()");
-            List<MySqlManager> Messages = new List<MySqlManager>();
+       public static List<MySqlManager> GetMessage()
+         {
+             //Debug.Starting("MySqlManager: GetMessage()");
+             List<MySqlManager> Messages = new List<MySqlManager>();
 
-            String query = "SELECT * FROM clients_message";
-            MySqlCommand cmd = new MySqlCommand(query, dbConfig);
-            try
-            {
+             String query = "SELECT * FROM clients_message";
+             MySqlCommand cmd = new MySqlCommand(query, dbConfig);
+             try
+             {
 
-                dbConfig.Open();
+                 dbConfig.Open();
 
-                MySqlDataReader DataReader = cmd.ExecuteReader();
+                 MySqlDataReader DataReader = cmd.ExecuteReader();
 
 
-                while (DataReader.Read())
-                {
-                    int id = (int)DataReader["id"];
-                    String fromUserId = DataReader["fromUserId"].ToString();
-                    String toUserId = DataReader["toUserId"].ToString();
-                    String message = DataReader["message"].ToString();
-                    int received = (int)DataReader["received"];
+                 while (DataReader.Read())
+                 {
+                     int id = (int)DataReader["id"];
+                     String fromUserId = DataReader["fromUserId"].ToString();
+                     String toUserId = DataReader["toUserId"].ToString();
+                     String message = DataReader["message"].ToString();
+                     int received = (int)DataReader["received"];
 
-                    MySqlManager Mess = new MySqlManager(id, fromUserId, toUserId, message, received);
-                    Messages.Add(Mess);
+                     MySqlManager Mess = new MySqlManager(id, fromUserId, toUserId, message, received);
+                     Messages.Add(Mess);
 
-                }
+                 }
 
-                dbConfig.Close();
-            }
-            catch (MySqlException Mex)
-            {
-                //Debug.Error("Database Configeration Error: " + Mex.Message);
-            }
+                 dbConfig.Close();
+             }
+             catch (MySqlException Mex)
+             {
+                 //Debug.Error("Database Configeration Error: " + Mex.Message);
+             }
 
-            //Debug.Finished("MySqlManager: GetMessage()");
+             //Debug.Finished("MySqlManager: GetMessage()");
 
-            return Messages;
-        }
+             return Messages;
+         }*/
 
 
     }

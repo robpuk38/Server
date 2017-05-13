@@ -24,6 +24,11 @@ namespace TheServer
             byte[] msg = Encoding.ASCII.GetBytes(data);
 
             handler.Send(msg);
+            
+        }
+
+        public static void Disconnected(Socket handler)
+        {
             handler.Shutdown(SocketShutdown.Both);
             handler.Close();
         }
@@ -33,43 +38,55 @@ namespace TheServer
             data = null;
 
 
-            string blowfishkey = "c2VydmVyIGNvbm5lY3Rpb24gdHlwZQ==";
+            
             int bytesRec = handler.Receive(bytes);
             data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
 
 
-            if (data.Contains("Awake_" + blowfishkey))
+            if (data.Contains(Construct.ONAWAKE))
             {
-                Debug.Info("AWAKE RETURNING USER");
-
-                Network.OnSocketConnection(handler, data);
+                Debug.Info("ON AWAKE: "+ data);
+                
+                Network.OnAwakeSocketConnection(handler, data);
+                
                 return;
             }
 
-            if (data.Contains("Awake_NewUser_" + blowfishkey))
+            if (data.Contains(Construct.ONADS))
             {
-                Debug.Log("WE HAVE A AWAKE MESSAGE POSSIBILE NEW USER");
-
-                Network.OnSocketNewClientConnection(handler, data);
+              //  Debug.Info("ON ADS: " + data);
+                
+                 Network.OnAdsSocketConnection(handler, data);
+                if (Clients.ConnectedClients != null)
+                {
+                   // Debug.Info("Clients Connected: " + Clients.ConnectedClients.Count);
+                }
+                if (Clients.ConnectingClients != null)
+                {
+                   // Debug.Info("Clients Connecting: " + Clients.ConnectingClients.Count);
+                }
                 return;
             }
 
-            if (data.Contains("Loggingin_" + blowfishkey))
+            if (data.Contains(Construct.ONLOGIN))
             {
-                Debug.Log("WE HAVE A LOGGING IN MESSAGE");
+                Debug.Info("ON LOGIN: " + data);
+               
+                 Network.OnLoginSocketConnection(handler, data);
+                
+                return;
+            }
 
-                Network.OnSocketNewClientConnectionLogin(handler, data);
+            if (data.Contains(Construct.ONLOGOUT))
+            {
+                Debug.Info("ON LOGOUT: " + data);
+
+                Network.OnLogoutSocketConnection(handler, data);
+
                 return;
             }
 
 
-            if (data.Contains("Logged_" + blowfishkey))
-            {
-                Debug.Log("WE HAVE A LOGIN  MESSAGE");
-
-                Network.OnSocketNewClientConnectionLogin(handler, data);
-                return;
-            }
 
 
             Debug.Error("UNK "+ data);
@@ -93,7 +110,7 @@ namespace TheServer
 
             MySqlManager.InitializeDB();
 
-            MySqlManager.LoadAllMessage();
+           // MySqlManager.LoadAllMessage();
            // StartUpdate();
 
 
