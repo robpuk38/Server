@@ -166,9 +166,11 @@ namespace TheServer
 
                 if (aData[i] == Construct._USERSTATE)
                 {
-
-                    //Debug.Log(Construct._USERSTATE + " " + aData[i + 1]);
-                    Clients.SetUserState(aData[i + 1]);
+                    if (aData[i + 1] != Construct._USERACTIVATION && aData[i + 1] != Construct._USERSTATE)
+                    {
+                      //  Debug.Log(Construct._USERSTATE + " " + aData[i + 1]);
+                        Clients.SetUserState(aData[i + 1]);
+                    }
                 }
 
                 if (aData[i] == Construct._USERXPOS)

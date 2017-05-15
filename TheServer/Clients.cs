@@ -978,23 +978,69 @@ namespace TheServer
     UserDeviceId,
     UserIpAddress,
     UserAcctivation);
+
+
             if (ConnectedClients != null)
             {
-                for (int j = 0; j < ConnectedClients.Count; j++)
-                {
-                    Debug.Log("WHO IS CONNECTED: " + ConnectedClients[j].UserId);
-                }
+                Debug.Info("Clients Connected: " + ConnectedClients.Count);
             }
+            if (ConnectingClients != null)
+            {
+                Debug.Info("Clients Connecting: " + ConnectingClients.Count);
+            }
+
+
+            if (ConnectingClients != null && _player.UserState == "3" && ConnectedClients != null && _player.UserState == "3")
+            {
+               // Debug.Error("_player.UserId " + _player.UserId);
+
+                if (ConnectedClients.Count > 0)
+                {
+                    for (int j = 0; j < ConnectedClients.Count; j++)
+                    {
+
+                        // so now we have a players list of all the connected clients so we can send them to all other clients.
+
+                        if (ConnectedClients[j].UserId == _player.UserId)
+                        {
+                            Debug.Log("I AM HERE : " + _player.UserId);
+
+                            // we are checking if the player is in the server or not if they are that is fine we do nothing
+
+
+                        }
+                        else
+                        {
+                            Debug.Log("THEY ARE HERE : " + ConnectedClients[j].UserId);
+                        }
+                        
+
+                        // Debug.Log("WHO IS CONNECTED: " + ConnectedClients[j].UserId);
+                    }
+                }
+                else
+                {
+                    ///Debug.Error("TEH SERVER MUST HAVE RESTARTED BECASUE THERE IS NO ONE IN THE LIST");
+                    ConnectingClients.Add(_player);
+                    ConnectedClients.Add(_player);
+                }
+
+            }
+
+
+
+
+           
             if (ConnectingClients != null)
             {
                 for (int j = 0; j < ConnectingClients.Count; j++)
                 {
                     if (ConnectingClients[j].UserId == UserId)
                     {
-                        Debug.Log("I AM ME: " + UserId);
-                        
+                        //Debug.Log("I AM ME: " + UserId);
 
-                       
+                        // Ok the user is already connected the the server and is in the list we are as our self so lets return and not add our self again
+                        return;
                        
 
                     }
@@ -1006,13 +1052,15 @@ namespace TheServer
 
             
 
-            if (ConnectingClients != null && _player.UserState == "1")
+            
+
+            if (ConnectingClients != null && _player.UserState == "1" || ConnectingClients != null && _player.UserState == "2")
             {
                 ConnectingClients.Add(_player);
             }
-            if (ConnectedClients != null && _player.UserState == "2")
+            if (ConnectedClients != null && _player.UserState == "1" || ConnectedClients != null && _player.UserState == "2")
             {
-                //ConnectedClients.Add(_player);
+                ConnectedClients.Add(_player);
             }
             
 
@@ -1059,14 +1107,7 @@ namespace TheServer
             }
 
 
-            if (ConnectedClients != null)
-            {
-                Debug.Info("Clients Connected: " + ConnectedClients.Count);
-            }
-            if (ConnectingClients != null)
-            {
-                Debug.Info("Clients Connecting: " + ConnectingClients.Count);
-            }
+            
 
             Debug.Finished("Clients: AddPlayers()");
         }

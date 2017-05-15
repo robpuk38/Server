@@ -45,7 +45,7 @@ namespace TheServer
 
             if (data.Contains(Construct.ONAWAKE))
             {
-                Debug.Info("ON AWAKE: "+ data);
+               // Debug.Info("ON AWAKE: "+ data);
                 
                 Network.OnAwakeSocketConnection(handler, data);
                 
@@ -54,23 +54,23 @@ namespace TheServer
 
             if (data.Contains(Construct.ONADS))
             {
-              //  Debug.Info("ON ADS: " + data);
+                //Debug.Info("ON ADS: " + data);
                 
                  Network.OnAdsSocketConnection(handler, data);
-                if (Clients.ConnectedClients != null)
+               /* if (Clients.ConnectedClients != null)
                 {
-                   // Debug.Info("Clients Connected: " + Clients.ConnectedClients.Count);
+                    Debug.Info("Clients Connected: " + Clients.ConnectedClients.Count);
                 }
                 if (Clients.ConnectingClients != null)
                 {
-                   // Debug.Info("Clients Connecting: " + Clients.ConnectingClients.Count);
-                }
+                    Debug.Info("Clients Connecting: " + Clients.ConnectingClients.Count);
+                }*/
                 return;
             }
 
             if (data.Contains(Construct.ONLOGIN))
             {
-                Debug.Info("ON LOGIN: " + data);
+                //Debug.Info("ON LOGIN: " + data);
                
                  Network.OnLoginSocketConnection(handler, data);
                 
@@ -79,7 +79,7 @@ namespace TheServer
 
             if (data.Contains(Construct.ONLOGOUT))
             {
-                Debug.Info("ON LOGOUT: " + data);
+                //Debug.Info("ON LOGOUT: " + data);
 
                 Network.OnLogoutSocketConnection(handler, data);
 

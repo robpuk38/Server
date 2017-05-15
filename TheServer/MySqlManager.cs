@@ -68,6 +68,9 @@ namespace TheServer
 
 
         }
+        
+
+
         public static void CheckClientsOnLoginData(Socket ClientSocket, string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ, string ClientFirstName ,string ClientUserId, string ClientAccessToken, string ClientPic, string ClientName, string ClientLastName, string ClientState, string ClientActivation)
         {
 
@@ -85,26 +88,258 @@ namespace TheServer
                 if (DataReader.Read())
                 {
                     Debug.Error("The client is a full member we have all the data to send back to the client");
-                    data = MyClientsTableDatatReader(DataReader);
-                    AddClientToList();
-                    dbConfig.Close();
-                    //Debug.Error("MY ID "+ ClientUserId);
-                    //Debug.Error("MY STATE " + ClientState);
-                    query = string.Format("UPDATE clients SET UserState='{0}' WHERE UserId = '{1}'", ClientState, ClientUserId);
-                    cmd = new MySqlCommand(query, dbConfig);
-                    try
+
+                    String UserId = DataReader["UserId"].ToString();
+
+                    if (UserId == ClientUserId)
                     {
-                        dbConfig.Open();
-                        cmd.ExecuteNonQuery();
+                        Debug.Log("WE ARE AS WE SAY WE ARE");
+
+                        data = MyClientsTableDatatReader(DataReader);
+                        // AddClientToList();
+                        dbConfig.Close();
+                        //Debug.Error("MY ID "+ ClientUserId);
+                        //Debug.Error("MY STATE " + ClientState);
+                        query = string.Format("UPDATE clients SET UserState='{0}' WHERE UserId = '{1}'", ClientState, ClientUserId);
+                        cmd = new MySqlCommand(query, dbConfig);
+                        try
+                        {
+                            dbConfig.Open();
+                            cmd.ExecuteNonQuery();
+                            dbConfig.Close();
+
+
+                        }
+                        catch (MySqlException Mex)
+                        {
+                            //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+                        }
+                        dbConfig.Close();
+                    }
+                    else
+                    {
+                        Debug.Log("WE ARE REMEMBERED AS SOMEONE ELSE WE MUST BE USING SAME DEVICE AND LOGIN WITH NEW ACCOUNT FROM A UNINSTALL REINSTALL OR A FACEBOOK LOGOUT AND RELOGIN WITH NEW ACCOUNT");
+                        // so check the clients table to see if this users ID is found 
+                        dbConfig.Close();
+                        query = "SELECT * FROM clients WHERE UserId ='" + ClientUserId + "' LIMIT 1";
+                        cmd = new MySqlCommand(query, dbConfig);
+                        try
+                        {
+                            dbConfig.Open();
+                            DataReader = cmd.ExecuteReader();
+                            if (DataReader.Read())
+                            {
+                                Debug.Log("WE ARE AS A MEMBER SO WE WANT TO UPDATE THE TEMPS TABLE WHERE DEVICE ID FOR THIS USER ALONG WITH CREDITS AND ID");
+
+                                Debug.Error(" SWITCHED ACCOUNTS " + ClientCredits);
+                                Debug.Error(" SWITCHED ACCOUNTS " + ClientIpAddress);
+                                Debug.Error(" SWITCHED ACCOUNTS " + ClientUserId);
+                                Debug.Error(" SWITCHED ACCOUNTS " + ClientDeviceId);
+
+
+
+                                String UserDeviceId = DataReader["UserDeviceId"].ToString();
+                                String UserCredits = DataReader["UserCredits"].ToString();
+                                
+
+                                if (UserDeviceId == Construct._SWITCHED_ACCOUNTS)
+                                {
+                                    Debug.Error("THIS DEVICE HAS ALREADY SWITCHED ACCOUNTS "+ ClientDeviceId);
+
+                                    // we want to get the information from the client who has the device ID first
+
+
+                                    dbConfig.Close();
+                                    query = "SELECT * FROM clients WHERE UserDeviceId ='" + ClientDeviceId + "' LIMIT 1";
+                                    cmd = new MySqlCommand(query, dbConfig);
+                                    try
+                                    {
+                                        dbConfig.Open();
+                                        DataReader = cmd.ExecuteReader();
+                                        if (DataReader.Read())
+                                        {
+                                            String ThemUserId = DataReader["UserId"].ToString();
+                                            
+
+                                            dbConfig.Close();
+                                            query = string.Format("UPDATE clients SET UserDeviceId='{0}' WHERE UserId = '{1}'", "SWITCHED_ACCOUNTS", ThemUserId);
+                                            cmd = new MySqlCommand(query, dbConfig);
+                                            try
+                                            {
+                                                dbConfig.Open();
+                                                cmd.ExecuteNonQuery();
+                                                dbConfig.Close();
+
+
+                                            }
+                                            catch (MySqlException Mex)
+                                            {
+                                                //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+                                            }
+                                            dbConfig.Close();
+
+                                        }
+                                    }
+                                    catch (MySqlException Mex)
+                                    {
+                                        //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+                                    }
+
+
+
+
+                                    dbConfig.Close();
+                                    query = string.Format("UPDATE clients SET UserDeviceId='{0}' WHERE UserId = '{1}'", ClientDeviceId, ClientUserId);
+                                    cmd = new MySqlCommand(query, dbConfig);
+                                    try
+                                    {
+                                        dbConfig.Open();
+                                        cmd.ExecuteNonQuery();
+                                        dbConfig.Close();
+
+
+                                    }
+                                    catch (MySqlException Mex)
+                                    {
+                                        //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+                                    }
+                                    dbConfig.Close();
+
+
+
+                                    
+                                    query = string.Format("UPDATE clients_temp SET UserCredits='{0}',UserGpsX='{1}',UserGpsY='{2}',UserGpsZ='{3}',UserIpAddress='{4}',UserId='{5}' WHERE UserDeviceId = '{6}'", UserCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientIpAddress, ClientUserId, ClientDeviceId);
+                                    cmd = new MySqlCommand(query, dbConfig);
+                                    try
+                                    {
+                                        dbConfig.Open();
+                                        cmd.ExecuteNonQuery();
+                                        dbConfig.Close();
+
+
+                                    }
+                                    catch (MySqlException Mex)
+                                    {
+                                        Debug.Error("Mysql Update Client Exception " + Mex.Message);
+                                    }
+
+                                    dbConfig.Close();
+
+                                }
+                                else
+                                {
+                                    Debug.Error("THIS DEVICE HAS NOT SWITCHED ACCOUNTS "+ ClientDeviceId);
+                                }
+
+
+                                
+                              
+
+
+                                query = "SELECT * FROM clients WHERE UserId ='" + ClientUserId + "' LIMIT 1";
+                                cmd = new MySqlCommand(query, dbConfig);
+                                try
+                                {
+                                    dbConfig.Open();
+                                    DataReader = cmd.ExecuteReader();
+                                    if (DataReader.Read())
+                                    {
+                                        data = MyClientsTableDatatReader(DataReader);
+                                dbConfig.Close();
+                                    }
+                                }
+                                catch (MySqlException Mex)
+                                {
+                                    //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+                                }
+                            }
+                            else
+                            {
+                               // UpdateDeviceSwitchedAccounts( ClientDeviceId,  ClientIpAddress,  ClientCredits,  ClientGpsX,  ClientGpsY,  ClientGpsZ,  ClientUserId,0);
+
+                               dbConfig.Close();
+                                query = string.Format("UPDATE clients_temp SET UserCredits='{0}', UserGpsX='{1}', UserGpsY='{2}', UserGpsZ='{3}', UserIpAddress='{4}', UserId='{5}' WHERE UserDeviceId = '{6}'", ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientIpAddress, ClientUserId, ClientDeviceId);
+                                cmd = new MySqlCommand(query, dbConfig);
+                                try
+                                {
+                                    dbConfig.Open();
+                                    cmd.ExecuteNonQuery();
+                                    dbConfig.Close();
+
+
+                                }
+                                catch (MySqlException Mex)
+                                {
+                                    //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+                                }
+
+                                dbConfig.Close();
+                                query = string.Format("UPDATE clients SET UserDeviceId='{0}' WHERE UserDeviceId = '{1}'","SWITCHED_ACCOUNTS", ClientDeviceId);
+                                cmd = new MySqlCommand(query, dbConfig);
+                                try
+                                {
+                                    dbConfig.Open();
+                                    cmd.ExecuteNonQuery();
+                                    dbConfig.Close();
+
+
+                                }
+                                catch (MySqlException Mex)
+                                {
+                                    //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+                                }
+                                dbConfig.Close();
+
+
+
+                                InsertNewUClient(ClientUserId,
+  ClientName,
+  ClientPic,
+  ClientFirstName,
+   ClientLastName,
+  ClientAccessToken,
+  ClientState,
+   "0",
+  ClientCredits,
+   "1",
+   "100",
+   "100",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+  ClientGpsX,
+  ClientGpsY,
+  ClientGpsZ,
+  "0",
+  ClientDeviceId,
+  ClientIpAddress,
+  ClientActivation);
+
+
+
+
+                                Debug.Log("ELSE THERE IS NO RECORD OF A USER FOUND SO WE WANT TO UPDATE THE TEMP TABLE FOR THI USERS INFO AND INSET THEM INTO THE DATABASE");
+                            }
+                            dbConfig.Close();
+                        }
+                        catch (MySqlException Mex)
+                        {
+                            //Debug.Error("Mysql Insert New Client Exception " + Mex.Message);
+                        }
+
+
+
+                        //if found update the temp table where device id and set the returning users credits and the clients user id to fix the temp table for that device id
+                        // else if they are not found then update the temp table as before but also insert new user into the clients table
                         dbConfig.Close();
 
+                    }
 
-                    }
-                    catch (MySqlException Mex)
-                    {
-                        //Debug.Error("Mysql Update Client Exception " + Mex.Message);
-                    }
-                    dbConfig.Close();
+                    
                 }
                 else
                 {
@@ -124,8 +359,7 @@ namespace TheServer
                         {
                             //The client is already a member and found in the database with a user ID thye must be uing a new device lets update the information
                             //Debug.Error("The client is already a member and found in the database with a user ID thye must be uing a new device lets update the information : ");
-                            // data = MyClientsTableDatatReader(DataReader);
-                            // AddClientToList();
+                             
 
                             Debug.Error("THE USER WAS FOUND UPDATING NEW INFORMATION : ");
                             UpdateClientDevice(ClientUserId, ClientAccessToken, ClientDeviceId, ClientIpAddress, ClientGpsX,ClientGpsY,ClientGpsZ, ClientCredits);
@@ -346,14 +580,11 @@ namespace TheServer
             Clients.SetUserAccessToken(UserAccessToken);
 
             String UserState = DataReader["UserState"].ToString();
-            Clients.SetUserState(UserState);
+            
             //Debug.Cleared("UserState " + UserState);
+           
+           // Clients.SetUserState(UserState);
 
-            //if (UserState == "0")
-            //{
-            //Debug.Cleared("UserState: CHANGE " + UserState);
-            //  UserState = "1";
-            // }
 
             String UserAccess = DataReader["UserAccess"].ToString();
             Clients.SetUserAccess(UserAccess);
@@ -495,10 +726,17 @@ Clients.GetUserAcctivation()
 );
         }
 
+
+        // I could do a check if the server shuts down and if the users state is 2
+        //for all users who are login i could reset all the users state back to 1 to add then back the the list
+        //so search clients where usersate == 2 and update all clients back to 1 so it ads all the clients back to the list of players sure 
+
+            // but right now i need to know why the userstate is saying 2 and the clicnt is getting back 1 so the client must have a defult that is always setting the players user state to 1 
+
         public static void CheckClientsOnAdsData(Socket ClientSocket, string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ,string ClientUserId, string ClientModType, string ClientState)
         {
 
-
+           // Debug.Error("MY USER STATE IS "+ClientState);
             query = "SELECT * FROM clients WHERE UserDeviceId ='" + ClientDeviceId + "' LIMIT 1";
             cmd = new MySqlCommand(query, dbConfig);
 
@@ -520,22 +758,27 @@ Clients.GetUserAcctivation()
 
                     String UserIpAddress = DataReader["UserIpAddress"].ToString();
                     String UserCredits = DataReader["UserCredits"].ToString();
-                    
+
+
+                    data = MyClientsTableDatatReader(DataReader);
+                    AddClientToList();
                     //Debug.Info("The user is found in the clitns table so we want to update the clients table where users new credits are ");
 
                     if (ClientModType == "1")
                     {
-                        //Debug.Info("UPDATING THE CLIENTS MODIFYED CREDITS CLIENT");
+                        Debug.Info("UPDATING THE CLIENTS MODIFYED CREDITS CLIENT");
 
+                        
 
                         UpdatingIntoClientsTable(ClientDeviceId, ClientIpAddress, ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId);
                     }
                     else if (ClientModType == "0")
                     {
-                        //Debug.Info("UPDATING THE CLIENTS MODIFYED CREDITS SERVER");
+                        Debug.Info("UPDATING THE CLIENTS MODIFYED CREDITS SERVER");
                         ClientDeviceId = UserDeviceId;
                         ClientIpAddress = UserIpAddress;
                         ClientCredits = UserCredits;
+                        UpdatingClientsLoginStatus(ClientDeviceId, ClientState);
                     }
 
                     dbConfig.Close();
@@ -588,6 +831,10 @@ Clients.GetUserAcctivation()
                                         UserIpAddress = DataReader["UserIpAddress"].ToString();
                                         UserCredits = DataReader["UserCredits"].ToString();
                                     }
+                                    else
+                                    {
+                                        Debug.Error("THE DEVICE IS REMEMBERED BUT THE USER IS NOT FOUND NEW ACCOUNT SAME DEVICE?");
+                                    }
                                 }
                                 catch (MySqlException Mex)
                                 {
@@ -596,6 +843,10 @@ Clients.GetUserAcctivation()
 
                                 dbConfig.Close();
                                 
+                            }
+                            else
+                            {
+                                Debug.Error("DID A NEW USER LOGIN WITH A DEVICE ALREASY STORED?");
                             }
 
 
@@ -645,10 +896,15 @@ Clients.GetUserAcctivation()
             {
                 //Debug.Error("Database Configeration Error: " + Mex.Message);
             }
-            data = Construct.USERDEVICEID + ClientDeviceId
-                        + Construct.USERIPADDRESS + ClientIpAddress
-                        + Construct.USERCREDITS + ClientCredits
-                        + Construct.USERSTATE + ClientState;
+
+            if (data == "")
+            {
+
+                data = Construct.USERDEVICEID + ClientDeviceId
+                            + Construct.USERIPADDRESS + ClientIpAddress
+                            + Construct.USERCREDITS + ClientCredits
+                            + Construct.USERSTATE + ClientState;
+            }
             Program.SendData(ClientSocket, data);
             Program.Disconnected(ClientSocket);
         }
@@ -699,6 +955,7 @@ Clients.GetUserAcctivation()
                 dbConfig.Open();
                 cmd.ExecuteNonQuery();
                 UpdatingIntoClientsTempTable(ClientDeviceId, ClientIpAddress, ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId);
+                
                 dbConfig.Close();
 
 
@@ -710,18 +967,24 @@ Clients.GetUserAcctivation()
             dbConfig.Close();
         }
 
-        public static void UpdatingIntoClientsTable(string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ,string ClientUserId)
+
+        public static void UpdatingClientsLoginStatus(string ClientDeviceId,  string ClientState)
         {
             //Debug.Starting("MySqlManager: UpdateClientData()");
             dbConfig.Close();
-            query = string.Format("UPDATE clients SET UserCredits='{0}',UserGpsX='{1}',UserGpsY='{2}',UserGpsZ='{3}',UserId='{4}' WHERE UserDeviceId = '{5}'", ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId, ClientDeviceId);
+            query = string.Format("UPDATE clients SET UserState='{0}' WHERE UserDeviceId = '{1}'", ClientState, ClientDeviceId);
             cmd = new MySqlCommand(query, dbConfig);
+            //string data = "";
             try
             {
                 dbConfig.Open();
                 cmd.ExecuteNonQuery();
+
                 dbConfig.Close();
-                UpdatingIntoClientsTempTable(ClientDeviceId, ClientIpAddress, ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId);
+                
+
+
+
 
             }
             catch (MySqlException Mex)
@@ -730,6 +993,35 @@ Clients.GetUserAcctivation()
             }
             dbConfig.Close();
             //Debug.Finished("MySqlManager: UpdateClientData()");
+
+        }
+
+        public static void UpdatingIntoClientsTable(string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ,string ClientUserId)
+        {
+            //Debug.Starting("MySqlManager: UpdateClientData()");
+            dbConfig.Close();
+            query = string.Format("UPDATE clients SET UserCredits='{0}',UserGpsX='{1}',UserGpsY='{2}',UserGpsZ='{3}',UserId='{4}' WHERE UserDeviceId = '{5}'", ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId, ClientDeviceId);
+            cmd = new MySqlCommand(query, dbConfig);
+            //string data = "";
+            try
+            {
+                dbConfig.Open();
+                cmd.ExecuteNonQuery();
+              
+                dbConfig.Close();
+                UpdatingIntoClientsTempTable(ClientDeviceId, ClientIpAddress, ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId);
+                
+                
+               
+
+            }
+            catch (MySqlException Mex)
+            {
+                //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+            }
+            dbConfig.Close();
+            //Debug.Finished("MySqlManager: UpdateClientData()");
+            
         }
 
         public static void UpdatingIntoClientsTempTable(string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ, string ClientUserId)

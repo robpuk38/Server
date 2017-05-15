@@ -78,5 +78,6 @@ namespace TheServer
         public static string _ZERO = "0";
         public static string _ONE = "1";
         public static string _NULL = "";
+        public static string _SWITCHED_ACCOUNTS = "SWITCHED_ACCOUNTS";
     }
 }
