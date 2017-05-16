@@ -87,13 +87,13 @@ namespace TheServer
                 DataReader = cmd.ExecuteReader();
                 if (DataReader.Read())
                 {
-                    Debug.Error("The client is a full member we have all the data to send back to the client");
+                   // Debug.Error("The client is a full member we have all the data to send back to the client");
 
                     String UserId = DataReader["UserId"].ToString();
 
                     if (UserId == ClientUserId)
                     {
-                        Debug.Log("WE ARE AS WE SAY WE ARE");
+                       // Debug.Log("WE ARE AS WE SAY WE ARE");
 
                         data = MyClientsTableDatatReader(DataReader);
                         // AddClientToList();
@@ -118,7 +118,7 @@ namespace TheServer
                     }
                     else
                     {
-                        Debug.Log("WE ARE REMEMBERED AS SOMEONE ELSE WE MUST BE USING SAME DEVICE AND LOGIN WITH NEW ACCOUNT FROM A UNINSTALL REINSTALL OR A FACEBOOK LOGOUT AND RELOGIN WITH NEW ACCOUNT");
+                       // Debug.Log("WE ARE REMEMBERED AS SOMEONE ELSE WE MUST BE USING SAME DEVICE AND LOGIN WITH NEW ACCOUNT FROM A UNINSTALL REINSTALL OR A FACEBOOK LOGOUT AND RELOGIN WITH NEW ACCOUNT");
                         // so check the clients table to see if this users ID is found 
                         dbConfig.Close();
                         query = "SELECT * FROM clients WHERE UserId ='" + ClientUserId + "' LIMIT 1";
@@ -129,12 +129,12 @@ namespace TheServer
                             DataReader = cmd.ExecuteReader();
                             if (DataReader.Read())
                             {
-                                Debug.Log("WE ARE AS A MEMBER SO WE WANT TO UPDATE THE TEMPS TABLE WHERE DEVICE ID FOR THIS USER ALONG WITH CREDITS AND ID");
+                                //Debug.Log("WE ARE AS A MEMBER SO WE WANT TO UPDATE THE TEMPS TABLE WHERE DEVICE ID FOR THIS USER ALONG WITH CREDITS AND ID");
 
-                                Debug.Error(" SWITCHED ACCOUNTS " + ClientCredits);
-                                Debug.Error(" SWITCHED ACCOUNTS " + ClientIpAddress);
-                                Debug.Error(" SWITCHED ACCOUNTS " + ClientUserId);
-                                Debug.Error(" SWITCHED ACCOUNTS " + ClientDeviceId);
+                               /// Debug.Error(" SWITCHED ACCOUNTS " + ClientCredits);
+                                //Debug.Error(" SWITCHED ACCOUNTS " + ClientIpAddress);
+                               // Debug.Error(" SWITCHED ACCOUNTS " + ClientUserId);
+                               // Debug.Error(" SWITCHED ACCOUNTS " + ClientDeviceId);
 
 
 
@@ -144,7 +144,7 @@ namespace TheServer
 
                                 if (UserDeviceId == Construct._SWITCHED_ACCOUNTS)
                                 {
-                                    Debug.Error("THIS DEVICE HAS ALREADY SWITCHED ACCOUNTS "+ ClientDeviceId);
+                                   // Debug.Info("THIS DEVICE HAS ALREADY SWITCHED ACCOUNTS "+ ClientDeviceId);
 
                                     // we want to get the information from the client who has the device ID first
 
@@ -162,14 +162,14 @@ namespace TheServer
                                             
 
                                             dbConfig.Close();
-                                            query = string.Format("UPDATE clients SET UserDeviceId='{0}' WHERE UserId = '{1}'", "SWITCHED_ACCOUNTS", ThemUserId);
+                                            query = string.Format("UPDATE clients SET UserDeviceId='{0}', UserState='{1}' WHERE UserId = '{2}'", "SWITCHED_ACCOUNTS","0", ThemUserId);
                                             cmd = new MySqlCommand(query, dbConfig);
                                             try
                                             {
                                                 dbConfig.Open();
                                                 cmd.ExecuteNonQuery();
                                                 dbConfig.Close();
-
+                                                //and i think this is where we will remove the client from the list of online players 
 
                                             }
                                             catch (MySqlException Mex)
@@ -189,7 +189,7 @@ namespace TheServer
 
 
                                     dbConfig.Close();
-                                    query = string.Format("UPDATE clients SET UserDeviceId='{0}' WHERE UserId = '{1}'", ClientDeviceId, ClientUserId);
+                                    query = string.Format("UPDATE clients SET UserDeviceId='{0}',  UserState='{1}' WHERE UserId = '{2}'","1", ClientDeviceId, ClientUserId);
                                     cmd = new MySqlCommand(query, dbConfig);
                                     try
                                     {
@@ -228,7 +228,7 @@ namespace TheServer
                                 }
                                 else
                                 {
-                                    Debug.Error("THIS DEVICE HAS NOT SWITCHED ACCOUNTS "+ ClientDeviceId);
+                                    Debug.Info("THIS DEVICE HAS NOT SWITCHED ACCOUNTS "+ ClientDeviceId);
                                 }
 
 
@@ -245,6 +245,7 @@ namespace TheServer
                                     if (DataReader.Read())
                                     {
                                         data = MyClientsTableDatatReader(DataReader);
+                                        AddClientToList();
                                 dbConfig.Close();
                                     }
                                 }
@@ -255,10 +256,14 @@ namespace TheServer
                             }
                             else
                             {
-                               // UpdateDeviceSwitchedAccounts( ClientDeviceId,  ClientIpAddress,  ClientCredits,  ClientGpsX,  ClientGpsY,  ClientGpsZ,  ClientUserId,0);
-
+                               
+                               // we are a new user coming into the servie with a device that is already in the service and the user who joined before has already had credits 
+                               // so this pass the old users credits as for the new users credits 
+                               // so we want to check the database first to see if this client is already a member but we know they are not already 
+                               // so we want to set there credits to 0 and we want them to login we get the information but we do not let them fully login untill they have the requirements 
+                               // how to do that.. well lets think about it
                                dbConfig.Close();
-                                query = string.Format("UPDATE clients_temp SET UserCredits='{0}', UserGpsX='{1}', UserGpsY='{2}', UserGpsZ='{3}', UserIpAddress='{4}', UserId='{5}' WHERE UserDeviceId = '{6}'", ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientIpAddress, ClientUserId, ClientDeviceId);
+                                query = string.Format("UPDATE clients_temp SET UserCredits='{0}', UserGpsX='{1}', UserGpsY='{2}', UserGpsZ='{3}', UserIpAddress='{4}', UserId='{5}' WHERE UserDeviceId = '{6}'", "-1", ClientGpsX, ClientGpsY, ClientGpsZ, ClientIpAddress, ClientUserId, ClientDeviceId);
                                 cmd = new MySqlCommand(query, dbConfig);
                                 try
                                 {
@@ -290,39 +295,42 @@ namespace TheServer
                                 }
                                 dbConfig.Close();
 
+                                // so we defulted the credits back to 0 for a new user comming in lets add a account type switch to the insetation of joining this way we can not activate the account or add the 
+                                // account to the list of players unitl they meet the requirements or lets just log them out if they have 0 credits but then we must alweays have at least 1 credit to stay login
+                                // so lets give them a -1 credit that way if its ever -1 that means they are a new user switching accounts and we can cath that from the client to log them out 
+                                if (ClientUserId != Construct._USERID)
+                                {
+                                    InsertNewUClient(ClientUserId,
+      ClientName,
+      ClientPic,
+      ClientFirstName,
+       ClientLastName,
+      ClientAccessToken,
+      ClientState,
+       "0",
+      ClientCredits,
+       "1",
+       "100",
+       "100",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+       "0",
+      ClientGpsX,
+      ClientGpsY,
+      ClientGpsZ,
+      "0",
+      ClientDeviceId,
+      ClientIpAddress,
+      ClientActivation);
+
+                                }
 
 
-                                InsertNewUClient(ClientUserId,
-  ClientName,
-  ClientPic,
-  ClientFirstName,
-   ClientLastName,
-  ClientAccessToken,
-  ClientState,
-   "0",
-  ClientCredits,
-   "1",
-   "100",
-   "100",
-   "0",
-   "0",
-   "0",
-   "0",
-   "0",
-   "0",
-   "0",
-  ClientGpsX,
-  ClientGpsY,
-  ClientGpsZ,
-  "0",
-  ClientDeviceId,
-  ClientIpAddress,
-  ClientActivation);
-
-
-
-
-                                Debug.Log("ELSE THERE IS NO RECORD OF A USER FOUND SO WE WANT TO UPDATE THE TEMP TABLE FOR THI USERS INFO AND INSET THEM INTO THE DATABASE");
+                               // Debug.Log("ELSE THERE IS NO RECORD OF A USER FOUND SO WE WANT TO UPDATE THE TEMP TABLE FOR THI USERS INFO AND INSET THEM INTO THE DATABASE");
                             }
                             dbConfig.Close();
                         }
@@ -344,7 +352,7 @@ namespace TheServer
                 else
                 {
                     // no client found lets insert the new data
-                    Debug.Error("CHECKING CLIENTS ID INSERTING INTO CLIENTS : ");
+                   // Debug.Info("CHECKING CLIENTS ID INSERTING INTO CLIENTS : ");
                     dbConfig.Close();
                     query = "SELECT * FROM clients WHERE UserId ='" + ClientUserId + "' LIMIT 1";
                     cmd = new MySqlCommand(query, dbConfig);
@@ -361,7 +369,7 @@ namespace TheServer
                             //Debug.Error("The client is already a member and found in the database with a user ID thye must be uing a new device lets update the information : ");
                              
 
-                            Debug.Error("THE USER WAS FOUND UPDATING NEW INFORMATION : ");
+                           // Debug.Info("THE USER WAS FOUND UPDATING NEW INFORMATION : ");
                             UpdateClientDevice(ClientUserId, ClientAccessToken, ClientDeviceId, ClientIpAddress, ClientGpsX,ClientGpsY,ClientGpsZ, ClientCredits);
                             dbConfig.Close();
                         }
@@ -369,7 +377,9 @@ namespace TheServer
                         {
                             dbConfig.Close();
                             // ok this is a new client and its ok to insert the data
-                            InsertNewUClient(ClientUserId,
+                            if (ClientUserId != Construct._USERID)
+                            {
+                                InsertNewUClient(ClientUserId,
    ClientName,
    ClientPic,
    ClientFirstName,
@@ -395,6 +405,7 @@ namespace TheServer
    ClientDeviceId,
    ClientIpAddress,
    ClientActivation);
+                            }
                             dbConfig.Close();
                         }
                     }
@@ -429,6 +440,45 @@ namespace TheServer
             {
                 dbConfig.Open();
                 cmd.ExecuteNonQuery();
+
+
+                if (Clients.ConnectedClients != null && Clients.ConnectingClients != null && Clients.GetUserState() == Construct._ZERO && Clients.GetUserName() != Construct._NULL)
+                {
+                    if (Clients.ConnectedClients.Count > 0)
+                    {
+                       // Debug.Error("THIS PLAYER UserState " + Clients.GetUserState());
+                       // Debug.Error("THIS PLAYER UserName " + Clients.GetUserName());
+
+                        for (int j = 0; j < Clients.ConnectedClients.Count; j++)
+                        {
+
+
+                           // Debug.Error("ID: " + j + " UserName " + Clients.ConnectedClients[j].UserName);
+                           // Debug.Error("ID: " + j + " UserState " + Clients.ConnectedClients[j].UserState);
+
+                            if (Clients.ConnectedClients[j].UserId == ClientUserId)
+                            {
+                                Clients.ConnectedClients[j].UserState = Construct._ZERO;
+                                Debug.Error("ID: " + j + " REMOVE THIS " + Clients.ConnectedClients[j].UserName);
+                                Clients.ConnectingClients.RemoveAt(j);
+                                Clients.ConnectedClients.RemoveAt(j);
+                            }
+
+                            
+                        }
+
+                    }
+                    else
+                    {
+                        Debug.Error("NO ONE IS ON THE SERVER AT ALL");
+                        return;
+                    }
+
+                }
+
+
+
+                Clients.SetUserState(Construct._ZERO);
                 dbConfig.Close();
 
 
@@ -581,7 +631,7 @@ namespace TheServer
 
             String UserState = DataReader["UserState"].ToString();
             
-            //Debug.Cleared("UserState " + UserState);
+           // Debug.Cleared("UserState " + UserState);
            
            // Clients.SetUserState(UserState);
 
@@ -695,35 +745,39 @@ namespace TheServer
 
         private static void AddClientToList()
         {
-            Clients.AddPlayers(
-                   Clients.GetId(),
-Clients.GetUserId(),
-Clients.GetUserName(),
-Clients.GetUserPic(),
-Clients.GetUserFirstName(),
-Clients.GetUserLastName(),
-Clients.GetUserAccessToken(),
-Clients.GetUserState(),
-Clients.GetUserAccess(),
-Clients.GetUserCredits(),
-Clients.GetUserLevel(),
-Clients.GetUserMana(),
-Clients.GetUserHealth(),
-Clients.GetUserExp(),
-Clients.GetUsersXpos(),
-Clients.GetUsersYpos(),
-Clients.GetUsersZpos(),
-Clients.GetUsersXrot(),
-Clients.GetUsersYrot(),
-Clients.GetUsersZrot(),
-Clients.GetUserGpsX(),
-Clients.GetUserGpsY(),
-Clients.GetUserGpsZ(),
-Clients.GetFirstTimeLogin(),
-Clients.GetUserDeviceId(),
-Clients.GetUserIpAddress(),
-Clients.GetUserAcctivation()
-);
+            if (Clients.GetUserId() != Construct._USERID)
+            {
+              //  Debug.Log("WHO AM I " + Clients.GetUserId() + " My NAME IS " + Clients.GetUserName() + " WHATS MY USERSTATE " + Clients.GetUserState());
+                Clients.AddPlayers(
+                       Clients.GetId(),
+    Clients.GetUserId(),
+    Clients.GetUserName(),
+    Clients.GetUserPic(),
+    Clients.GetUserFirstName(),
+    Clients.GetUserLastName(),
+    Clients.GetUserAccessToken(),
+    Clients.GetUserState(),
+    Clients.GetUserAccess(),
+    Clients.GetUserCredits(),
+    Clients.GetUserLevel(),
+    Clients.GetUserMana(),
+    Clients.GetUserHealth(),
+    Clients.GetUserExp(),
+    Clients.GetUsersXpos(),
+    Clients.GetUsersYpos(),
+    Clients.GetUsersZpos(),
+    Clients.GetUsersXrot(),
+    Clients.GetUsersYrot(),
+    Clients.GetUsersZrot(),
+    Clients.GetUserGpsX(),
+    Clients.GetUserGpsY(),
+    Clients.GetUserGpsZ(),
+    Clients.GetFirstTimeLogin(),
+    Clients.GetUserDeviceId(),
+    Clients.GetUserIpAddress(),
+    Clients.GetUserAcctivation()
+    );
+            }
         }
 
 
@@ -731,9 +785,86 @@ Clients.GetUserAcctivation()
         //for all users who are login i could reset all the users state back to 1 to add then back the the list
         //so search clients where usersate == 2 and update all clients back to 1 so it ads all the clients back to the list of players sure 
 
-            // but right now i need to know why the userstate is saying 2 and the clicnt is getting back 1 so the client must have a defult that is always setting the players user state to 1 
+        // but right now i need to know why the userstate is saying 2 and the clicnt is getting back 1 so the client must have a defult that is always setting the players user state to 1 
 
-        public static void CheckClientsOnAdsData(Socket ClientSocket, string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ,string ClientUserId, string ClientModType, string ClientState)
+        public static void CheckClientsOnSwitchedAccountData(Socket ClientSocket, string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ, string ClientUserId)
+        {
+
+
+
+            Debug.Error("USERID "+ ClientUserId);
+            Debug.Error("USERDEVICE " + ClientDeviceId);
+
+            // we want to select from the clients table where the device ID is located and update that device ID to as Switched Accounts 
+
+            query = "SELECT * FROM clients WHERE UserDeviceId ='" + ClientDeviceId + "' LIMIT 1";
+            cmd = new MySqlCommand(query, dbConfig);
+
+            string data = "";
+
+            try
+            {
+
+                dbConfig.Open();
+
+                DataReader = cmd.ExecuteReader();
+                if (DataReader.Read())
+                {
+
+                    //The user is found in the clitns table so we want to update the clients table where users new credits are
+                    //String UserDeviceId = DataReader["UserDeviceId"].ToString();
+
+                    dbConfig.Close();
+                    query = string.Format("UPDATE clients SET UserState='{0}',UserDeviceId='{1}' WHERE UserDeviceId = '{2}'", "0", Construct._SWITCHED_ACCOUNTS, ClientDeviceId);
+                    cmd = new MySqlCommand(query, dbConfig);
+                    try
+                    {
+                        dbConfig.Open();
+                        cmd.ExecuteNonQuery();
+                        dbConfig.Close();
+
+
+                    }
+                    catch (MySqlException Mex)
+                    {
+                        //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+                    }
+                    dbConfig.Close();
+                }
+            }
+            catch (MySqlException Mex)
+            {
+                //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+            }
+
+
+
+            dbConfig.Close();
+            query = string.Format("UPDATE clients_temp SET UserCredits='{0}',UserGpsX='{1}',UserGpsY='{2}',UserGpsZ='{3}',UserId='{4}' WHERE UserDeviceId = '{5}'", ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId, ClientDeviceId);
+            cmd = new MySqlCommand(query, dbConfig);
+            try
+            {
+                dbConfig.Open();
+                cmd.ExecuteNonQuery();
+                dbConfig.Close();
+
+
+            }
+            catch (MySqlException Mex)
+            {
+                //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+            }
+            dbConfig.Close();
+
+            data = Construct.USERDEVICEID + ClientDeviceId
+                           + Construct.USERIPADDRESS + ClientIpAddress
+                           + Construct.USERCREDITS + ClientCredits;
+
+            Program.SendData(ClientSocket, data);
+            Program.Disconnected(ClientSocket);
+        }
+
+            public static void CheckClientsOnAdsData(Socket ClientSocket, string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ,string ClientUserId, string ClientModType, string ClientState)
         {
 
            // Debug.Error("MY USER STATE IS "+ClientState);
@@ -766,7 +897,7 @@ Clients.GetUserAcctivation()
 
                     if (ClientModType == "1")
                     {
-                        Debug.Info("UPDATING THE CLIENTS MODIFYED CREDITS CLIENT");
+                       // Debug.Info("UPDATING THE CLIENTS MODIFYED CREDITS CLIENT");
 
                         
 
@@ -774,7 +905,7 @@ Clients.GetUserAcctivation()
                     }
                     else if (ClientModType == "0")
                     {
-                        Debug.Info("UPDATING THE CLIENTS MODIFYED CREDITS SERVER");
+                        //Debug.Info("UPDATING THE CLIENTS MODIFYED CREDITS SERVER");
                         ClientDeviceId = UserDeviceId;
                         ClientIpAddress = UserIpAddress;
                         ClientCredits = UserCredits;
@@ -846,7 +977,8 @@ Clients.GetUserAcctivation()
                             }
                             else
                             {
-                                Debug.Error("DID A NEW USER LOGIN WITH A DEVICE ALREASY STORED?");
+                                //Debug.info("CHECK WHO IS HERE? ARE ALL USERS LOGGED OUT");
+                                AddClientToList();
                             }
 
 
@@ -1000,7 +1132,7 @@ Clients.GetUserAcctivation()
         {
             //Debug.Starting("MySqlManager: UpdateClientData()");
             dbConfig.Close();
-            query = string.Format("UPDATE clients SET UserCredits='{0}',UserGpsX='{1}',UserGpsY='{2}',UserGpsZ='{3}',UserId='{4}' WHERE UserDeviceId = '{5}'", ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientUserId, ClientDeviceId);
+            query = string.Format("UPDATE clients SET UserCredits='{0}',UserGpsX='{1}',UserGpsY='{2}',UserGpsZ='{3}' WHERE UserDeviceId = '{4}'", ClientCredits, ClientGpsX, ClientGpsY, ClientGpsZ, ClientDeviceId);
             cmd = new MySqlCommand(query, dbConfig);
             //string data = "";
             try

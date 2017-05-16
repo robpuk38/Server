@@ -907,18 +907,12 @@ namespace TheServer
         }
 
 
-        public static int InCommingConnetions = 0;
+        
 
-       /* public static void CheckClientsData(Socket ClientSocket, string UserID, string AccessToken, string LoginStatus)
-        {
-            Debug.Starting("Clients: CheckClientsData()");
-           // MySqlManager.LoadPlayersData(ClientSocket, UserID, AccessToken, LoginStatus);
+        
 
+        
 
-
-            Debug.Finished("Clients: CheckClientsData()");
-
-        }*/
 
         public static void AddPlayers(string Id,
    string UserId,
@@ -980,6 +974,8 @@ namespace TheServer
     UserAcctivation);
 
 
+           
+
             if (ConnectedClients != null)
             {
                 Debug.Info("Clients Connected: " + ConnectedClients.Count);
@@ -990,9 +986,12 @@ namespace TheServer
             }
 
 
-            if (ConnectingClients != null && _player.UserState == "3" && ConnectedClients != null && _player.UserState == "3")
+            
+
+            if ( ConnectingClients != null && _player.UserState == "3" && ConnectedClients != null)
             {
-               // Debug.Error("_player.UserId " + _player.UserId);
+                
+                bool alreadyExists = ConnectingClients.Contains(_player);
 
                 if (ConnectedClients.Count > 0)
                 {
@@ -1000,29 +999,80 @@ namespace TheServer
                     {
 
                         // so now we have a players list of all the connected clients so we can send them to all other clients.
+                       
+
 
                         if (ConnectedClients[j].UserId == _player.UserId)
                         {
                             Debug.Log("I AM HERE : " + _player.UserId);
 
+                            
                             // we are checking if the player is in the server or not if they are that is fine we do nothing
 
 
                         }
-                        else
+                        else if(ConnectedClients[j].UserState == "3")
                         {
                             Debug.Log("THEY ARE HERE : " + ConnectedClients[j].UserId);
                         }
                         
 
-                        // Debug.Log("WHO IS CONNECTED: " + ConnectedClients[j].UserId);
+                        
+                    }
+                    if (alreadyExists == true)
+                    {
+                       
+                        return;
+                    }
+                    else if (alreadyExists == false)
+                    {
+                      
+
+                        if (ConnectingClients != null)
+                        {
+                            for (int j = 0; j < ConnectingClients.Count; j++)
+                            {
+                                if (ConnectingClients[j].UserId == UserId)
+                                {
+                                   
+
+                                    // Ok the user is already connected the the server and is in the list we are as our self so lets return and not add our self again
+                                    return;
+
+
+                                }
+
+
+                            }
+                        }
+                        if (_player.UserId != Construct._USERID && _player.UserName != Construct._USERGUEST)
+                        {
+                            Debug.Log("I DO NOT EXISTS : " + _player.UserId);
+                            ConnectingClients.Add(_player);
+                            ConnectedClients.Add(_player);
+                        }
                     }
                 }
                 else
                 {
-                    ///Debug.Error("TEH SERVER MUST HAVE RESTARTED BECASUE THERE IS NO ONE IN THE LIST");
-                    ConnectingClients.Add(_player);
-                    ConnectedClients.Add(_player);
+                    
+                    
+
+                    if (alreadyExists == true)
+                    {
+                        
+                        return;
+                    }
+                    else if (alreadyExists == false)
+                    {
+                        if (_player.UserId != Construct._USERID && _player.UserName != Construct._USERGUEST)
+                        {
+                            Debug.Log("I DO NOT EXISTS : " + _player.UserId);
+                            ConnectingClients.Add(_player);
+                            ConnectedClients.Add(_player);
+                        }
+                    }
+
                 }
 
             }
@@ -1030,85 +1080,42 @@ namespace TheServer
 
 
 
-           
+
             if (ConnectingClients != null)
             {
                 for (int j = 0; j < ConnectingClients.Count; j++)
                 {
                     if (ConnectingClients[j].UserId == UserId)
                     {
-                        //Debug.Log("I AM ME: " + UserId);
+                        
 
                         // Ok the user is already connected the the server and is in the list we are as our self so lets return and not add our self again
                         return;
-                       
+
 
                     }
-                   
+
 
                 }
             }
 
 
-            
 
-            
 
-            if (ConnectingClients != null && _player.UserState == "1" || ConnectingClients != null && _player.UserState == "2")
+
+
+
+            if (ConnectingClients != null && _player.UserState == "1" || ConnectingClients != null && _player.UserState == "2" && _player.UserId != Construct._USERID && _player.UserName != Construct._USERGUEST)
             {
                 ConnectingClients.Add(_player);
             }
-            if (ConnectedClients != null && _player.UserState == "1" || ConnectedClients != null && _player.UserState == "2")
+            if (ConnectedClients != null && _player.UserState == "1" || ConnectedClients != null && _player.UserState == "2" && _player.UserId != Construct._USERID && _player.UserName != Construct._USERGUEST)
             {
                 ConnectedClients.Add(_player);
             }
             
 
-
-
-            foreach (Players players in ConnectingClients)
-            {
-               /* Debug.Cleared("Id: " + players.Id);
-
-                Debug.Cleared("UserId: " + players.UserId);
-                Debug.Cleared("UserName: " + players.UserName);
-                Debug.Cleared("UserPic: " + players.UserPic);
-
-                Debug.Cleared("UserFirstName: " + players.UserFirstName);
-                Debug.Cleared("UserLastName: " + players.UserLastName);
-                Debug.Cleared("UserAccessToken: " + players.UserAccessToken);
-                Debug.Cleared("UserState: " + players.UserState);
-                Debug.Cleared("UserAccess: " + players.UserAccess);
-                Debug.Cleared("UserCredits: " + players.UserCredits);
-                Debug.Cleared("UserLevel: " + players.UserLevel);
-                Debug.Cleared("UserMana: " + players.UserMana);
-                Debug.Cleared("UserHealth: " + players.UserHealth);
-                Debug.Cleared("UserExp: " + players.UserExp);
-                Debug.Cleared("UsersXpos: " + players.UsersXpos);
-                Debug.Cleared("UsersYpos: " + players.UsersYpos);
-                Debug.Cleared("UsersZpos: " + players.UsersZpos);
-                Debug.Cleared("UsersXrot: " + players.UsersXrot);
-                Debug.Cleared("UsersYrot: " + players.UsersYrot);
-                Debug.Cleared("UsersZrot: " + players.UsersZrot);
-                Debug.Cleared("UserGpsX: " + players.UserGpsX);
-                Debug.Cleared("UserGpsY: " + players.UserGpsY);
-                Debug.Cleared("UserGpsZ: " + players.UserGpsZ);
-                Debug.Cleared("FirstTimeLogin: " + players.FirstTimeLogin);
-                Debug.Cleared("UserDeviceId: " + players.UserDeviceId);
-                Debug.Cleared("UserIpAddress: " + players.UserIpAddress);
-                Debug.Cleared("UserAcctivation: " + players.UserAcctivation);
-                string data = "|ID|" + players.Id
-                    + "|USERID|" + players.UserId;*/
-                //SEND THE DATA TO THE CLIENT
-
-
-
-
-            }
-
-
             
-
             Debug.Finished("Clients: AddPlayers()");
         }
 

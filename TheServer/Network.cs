@@ -111,7 +111,7 @@ namespace TheServer
                 {
 
                     //Debug.Log(Construct._USERID + " " + aData[i + 1]);
-                    if (aData[i + 1] != Construct._USERID && aData[i + 1] != Construct._ZERO && aData[i + 1] != Construct._USERDEVICEID && aData[i + 1] != Construct._USERADSMODTYPE && aData[i + 1] != Construct._USERSTATE && aData[i + 1] != Construct._NULL)
+                    if (aData[i + 1] != Construct._USERID && aData[i + 1] != Construct._ZERO && aData[i + 1] != Construct._USERDEVICEID && aData[i + 1] != Construct._USERADSMODTYPE && aData[i + 1] != Construct._USERSTATE && aData[i + 1] != Construct._NULL && aData[i + 1] != Construct._USERACCESSTOKEN && aData[i + 1] != Construct._USERNAME)
                     {
                         //Debug.Error(Construct._USERID + "  WE MADE IT IN EVERYTHING IS OK FOR USER ID " + aData[i + 1]);
                         Clients.SetUserId(aData[i + 1]);
@@ -273,6 +273,23 @@ namespace TheServer
                 Clients.GetUserLastName(),
                 Clients.GetUserState(),
                 Clients.GetUserAcctivation());
+
+        }
+
+        public static void OnLogoutSwitchedAccountsSocketConnection(Socket ClientSocket, String data)
+        {
+
+
+            ClientUpdateDataManager(data);
+            MySqlManager.CheckClientsOnSwitchedAccountData(ClientSocket,
+               Clients.GetUserDeviceId(),
+               Clients.GetUserIpAddress(),
+               Clients.GetUserCredits(),
+               Clients.GetUserGpsX(),
+               Clients.GetUserGpsY(),
+               Clients.GetUserGpsZ(),
+               Clients.GetUserId());
+
 
         }
 

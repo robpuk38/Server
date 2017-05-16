@@ -57,14 +57,7 @@ namespace TheServer
                 //Debug.Info("ON ADS: " + data);
                 
                  Network.OnAdsSocketConnection(handler, data);
-               /* if (Clients.ConnectedClients != null)
-                {
-                    Debug.Info("Clients Connected: " + Clients.ConnectedClients.Count);
-                }
-                if (Clients.ConnectingClients != null)
-                {
-                    Debug.Info("Clients Connecting: " + Clients.ConnectingClients.Count);
-                }*/
+              
                 return;
             }
 
@@ -82,6 +75,15 @@ namespace TheServer
                 //Debug.Info("ON LOGOUT: " + data);
 
                 Network.OnLogoutSocketConnection(handler, data);
+
+                return;
+            }
+
+            if (data.Contains(Construct.ONSWITCHEDACCOUNT))
+            {
+                //Debug.Info("ON LOGOUT: " + data);
+
+                Network.OnLogoutSwitchedAccountsSocketConnection(handler, data);
 
                 return;
             }
