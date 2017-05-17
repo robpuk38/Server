@@ -88,6 +88,15 @@ namespace TheServer
                 return;
             }
 
+            if (data.Contains(Construct.ONNEWMESSAGE))
+            {
+                //Debug.Info("ON LOGOUT: " + data);
+
+                Network.OnNewMessageSocketConnection(handler, data);
+
+                return;
+            }
+
 
 
 

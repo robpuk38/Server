@@ -68,7 +68,16 @@ namespace TheServer
 
 
         }
-        
+
+
+
+        public static void PostNewMessage(Socket ClientSocket, string data)
+        {
+
+
+            Program.SendData(ClientSocket, data);
+            Program.Disconnected(ClientSocket);
+        }
 
 
         public static void CheckClientsOnLoginData(Socket ClientSocket, string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ, string ClientFirstName ,string ClientUserId, string ClientAccessToken, string ClientPic, string ClientName, string ClientLastName, string ClientState, string ClientActivation)
@@ -781,22 +790,13 @@ namespace TheServer
         }
 
 
-        // I could do a check if the server shuts down and if the users state is 2
-        //for all users who are login i could reset all the users state back to 1 to add then back the the list
-        //so search clients where usersate == 2 and update all clients back to 1 so it ads all the clients back to the list of players sure 
-
-        // but right now i need to know why the userstate is saying 2 and the clicnt is getting back 1 so the client must have a defult that is always setting the players user state to 1 
-
+       
         public static void CheckClientsOnSwitchedAccountData(Socket ClientSocket, string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ, string ClientUserId)
         {
 
 
 
-            Debug.Error("USERID "+ ClientUserId);
-            Debug.Error("USERDEVICE " + ClientDeviceId);
-
-            // we want to select from the clients table where the device ID is located and update that device ID to as Switched Accounts 
-
+          
             query = "SELECT * FROM clients WHERE UserDeviceId ='" + ClientDeviceId + "' LIMIT 1";
             cmd = new MySqlCommand(query, dbConfig);
 
@@ -811,9 +811,7 @@ namespace TheServer
                 if (DataReader.Read())
                 {
 
-                    //The user is found in the clitns table so we want to update the clients table where users new credits are
-                    //String UserDeviceId = DataReader["UserDeviceId"].ToString();
-
+                   
                     dbConfig.Close();
                     query = string.Format("UPDATE clients SET UserState='{0}',UserDeviceId='{1}' WHERE UserDeviceId = '{2}'", "0", Construct._SWITCHED_ACCOUNTS, ClientDeviceId);
                     cmd = new MySqlCommand(query, dbConfig);

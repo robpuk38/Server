@@ -276,6 +276,41 @@ namespace TheServer
 
         }
 
+        public static void OnNewMessageSocketConnection(Socket ClientSocket, String data)
+        {
+
+            
+                string[] aData = data.Split('|');
+                for (int i = 0; i < aData.Length - 1; i++)
+                {
+
+                if (aData[i] == Construct._FROMUSERID)
+                {
+                    // 
+                    Debug.Log(Construct._FROMUSERID + ": " + aData[i + 1]);
+                }
+                if (aData[i] == Construct._THEMESSAGE)
+                {
+                   
+                    Debug.Log(Construct._THEMESSAGE + ": " + aData[i + 1]);
+                }
+                if (aData[i] == Construct._TOUSERID)
+                {
+
+                    Debug.Log(Construct._TOUSERID + ": " + aData[i + 1]);
+                }
+
+                if (aData[i] == Construct._USERNAME)
+                {
+                   
+                    Debug.Log(Construct._USERNAME + ": " + aData[i + 1]);
+                }
+            }
+
+            MySqlManager.PostNewMessage(ClientSocket,data);
+
+        }
+
         public static void OnLogoutSwitchedAccountsSocketConnection(Socket ClientSocket, String data)
         {
 

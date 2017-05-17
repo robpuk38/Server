@@ -46,6 +46,7 @@ namespace TheServer
         public static string ONADS = "ONADS_" + BLOWFISHKEY;
         public static string ONLOGOUT = "ONLOGOUT_" + BLOWFISHKEY;
         public static string ONSWITCHEDACCOUNT = "ONSWITCHEDACCOUNT_" + BLOWFISHKEY;
+        public static string ONNEWMESSAGE = "ONNEWMESSAGE_" + BLOWFISHKEY;
 
 
         public static string _ID = "ID";
@@ -84,5 +85,14 @@ namespace TheServer
         public static string _NULL = "";
         public static string _NEGITIVEONE = "-1";
         public static string _SWITCHED_ACCOUNTS = "SWITCHED_ACCOUNTS";
+
+        public static string FROMUSERID = "|FROMUSERID|";
+        public static string TOUSERID = "|TOUSERID|";
+        public static string THEMESSAGE = "|THEMESSAGE|";
+
+
+        public static string _FROMUSERID = "FROMUSERID";
+        public static string _TOUSERID = "TOUSERID";
+        public static string _THEMESSAGE = "THEMESSAGE";
     }
 }
