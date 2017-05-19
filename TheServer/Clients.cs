@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
 
@@ -6,10 +7,10 @@ namespace TheServer
 {
     public class Players
     {
+        
 
 
-
-
+        public Socket ClientSocket { get; internal set; }
         public String Id { get; internal set; }
         public String UserId { get; internal set; }
         public String UserName { get; internal set; }
@@ -40,7 +41,7 @@ namespace TheServer
 
 
 
-        public Players(string _Id,
+        public Players(Socket _ClientSocket, string _Id,
                        string _UserId,
                        string _UserName,
                        string _UserPic,
@@ -68,6 +69,7 @@ namespace TheServer
                        string _UserIpAddress,
                        string _UserAcctivation)
         {
+            ClientSocket = _ClientSocket;
             Id = _Id;
             UserId = _UserId;
             UserName = _UserName;
@@ -106,33 +108,34 @@ namespace TheServer
 
         private Clients()
         {
-            player = new Players(Id,
-    UserId,
-    UserName,
-    UserPic,
-    UserFirstName,
-    UserLastName,
-    UserAccessToken,
-    UserState,
-    UserAccess,
-    UserCredits,
-    UserLevel,
-    UserMana,
-    UserHealth,
-    UserExp,
-    UsersXpos,
-    UsersYpos,
-    UsersZpos,
-    UsersXrot,
-    UsersYrot,
-    UsersZrot,
-    UserGpsX,
-    UserGpsY,
-    UserGpsZ,
-    FirstTimeLogin,
-    UserDeviceId,
-    UserIpAddress,
-    UserAcctivation);
+            player = new Players(ClientSocket,
+            Id,
+            UserId,
+            UserName,
+            UserPic,
+            UserFirstName,
+            UserLastName,
+            UserAccessToken,
+            UserState,
+            UserAccess,
+            UserCredits,
+            UserLevel,
+            UserMana,
+            UserHealth,
+            UserExp,
+            UsersXpos,
+            UsersYpos,
+            UsersZpos,
+            UsersXrot,
+            UsersYrot,
+            UsersZrot,
+            UserGpsX,
+            UserGpsY,
+            UserGpsZ,
+            FirstTimeLogin,
+            UserDeviceId,
+            UserIpAddress,
+            UserAcctivation);
         }
 
 
@@ -145,7 +148,7 @@ namespace TheServer
         private static Clients instance = new Clients();
 
 
-
+        private Socket ClientSocket { get; set; }
         private String Id { get; set; }
         private String UserId { get; set; }
         private String UserName { get; set; }
@@ -178,6 +181,31 @@ namespace TheServer
 
     public static List<Players> ConnectingClients= new List<Players>();
         public static List<Players> ConnectedClients= new List<Players>();
+       
+
+        
+
+        private Socket _GetUserClientSocket()
+        {
+            return ClientSocket;
+        }
+
+        public static Socket GetUserClientSocket()
+        {
+
+            return instance._GetUserClientSocket();
+        }
+
+        private void _SetUserClientSocket(Socket set)
+        {
+            ClientSocket = set;
+        }
+
+        public static void SetUserClientSocket(Socket set)
+        {
+
+            instance.ClientSocket = set;
+        }
 
         private string _GetUserAcctivation()
         {
@@ -914,7 +942,7 @@ namespace TheServer
         
 
 
-        public static void AddPlayers(string Id,
+        public static void AddPlayers(Socket ClientSocket, string Id,
    string UserId,
    string UserName,
    string UserPic,
@@ -943,9 +971,9 @@ namespace TheServer
   string UserAcctivation)
         {
 
-
+            
             Debug.Starting("Clients: AddPlayers()");
-            Players _player = new Players(Id,
+            Players _player = new Players(ClientSocket,Id,
     UserId,
     UserName,
     UserPic,
@@ -974,7 +1002,7 @@ namespace TheServer
     UserAcctivation);
 
 
-           
+            
 
             if (ConnectedClients != null)
             {
@@ -995,29 +1023,17 @@ namespace TheServer
 
                 if (ConnectedClients.Count > 0)
                 {
+                   
                     for (int j = 0; j < ConnectedClients.Count; j++)
                     {
-
-                        // so now we have a players list of all the connected clients so we can send them to all other clients.
+                        
+                        
                        
-
-
-                        if (ConnectedClients[j].UserId == _player.UserId)
-                        {
-                            Debug.Log("I AM HERE : " + _player.UserId);
-
-                            
-                            // we are checking if the player is in the server or not if they are that is fine we do nothing
-
-
-                        }
-                        else if(ConnectedClients[j].UserState == "3")
-                        {
-                            Debug.Log("THEY ARE HERE : " + ConnectedClients[j].UserId);
-                        }
+                        Debug.Log("WHO IS HERE : " + ConnectedClients[j].UserId);
                         
+                         //Broadcast All The Data I think
 
-                        
+
                     }
                     if (alreadyExists == true)
                     {
@@ -1050,6 +1066,7 @@ namespace TheServer
                             Debug.Log("I DO NOT EXISTS : " + _player.UserId);
                             ConnectingClients.Add(_player);
                             ConnectedClients.Add(_player);
+                            
                         }
                     }
                 }
@@ -1070,6 +1087,7 @@ namespace TheServer
                             Debug.Log("I DO NOT EXISTS : " + _player.UserId);
                             ConnectingClients.Add(_player);
                             ConnectedClients.Add(_player);
+                            
                         }
                     }
 
@@ -1113,9 +1131,13 @@ namespace TheServer
             {
                 ConnectedClients.Add(_player);
             }
-            
 
             
+
+
+
+
+
             Debug.Finished("Clients: AddPlayers()");
         }
 

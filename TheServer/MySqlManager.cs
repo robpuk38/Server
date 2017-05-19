@@ -71,12 +71,44 @@ namespace TheServer
 
 
 
-        public static void PostNewMessage(Socket ClientSocket, string data)
+        public static void PostNewMessage(Socket ClientSocket, string fromuserid, string message, string touserid)
         {
 
+            string data = "";
+            string fromuserpic = "";
+            string fromusername = "";
 
-            Program.SendData(ClientSocket, data);
-            Program.Disconnected(ClientSocket);
+            query = "SELECT * FROM clients WHERE UserId ='" + fromuserid + "' LIMIT 1";
+            cmd = new MySqlCommand(query, dbConfig);
+            try
+            {
+
+                dbConfig.Open();
+
+                DataReader = cmd.ExecuteReader();
+                if (DataReader.Read())
+                {
+                    fromusername = DataReader["UserName"].ToString();
+                    ChatManager.SetChatFromUserName(fromusername);
+                    fromuserpic = DataReader["UserPic"].ToString();
+                    ChatManager.SetChatFromUserPic(fromuserpic);
+                }
+                dbConfig.Close();
+            }
+            catch (MySqlException Mex)
+            {
+                //Debug.Error("Mysql Update Client Exception " + Mex.Message);
+            }
+            dbConfig.Close();
+
+            ChatManager.AddMessage(ClientSocket,fromuserid, message, touserid, fromuserpic, fromusername);
+            /*data = Construct.FROMUSERID + fromuserid
+                      + Construct.THEMESSAGE + message 
+                      + Construct.TOUSERID + touserid
+                      + Construct.FROMUSERPIC + fromuserpic
+                      + Construct.FROMUSERNAME + fromusername;
+            ChatManager.BroadCastToAll(ClientSocket, data);*/
+            
         }
 
 
@@ -434,8 +466,8 @@ namespace TheServer
                 //Debug.Error("Mysql Insert New Client Exception " + Mex.Message);
             }
 
-            Program.SendData(ClientSocket, data);
-            Program.Disconnected(ClientSocket);
+            Program.SendSelfData(ClientSocket, data);
+           
 
         }
 
@@ -500,8 +532,8 @@ namespace TheServer
 
            string data = Construct.USERID + ClientUserId
                        + Construct.USERSTATE + ClientState;
-            Program.SendData(ClientSocket, data);
-            Program.Disconnected(ClientSocket);
+            Program.SendSelfData(ClientSocket, data);
+            
 
         }
 
@@ -757,7 +789,7 @@ namespace TheServer
             if (Clients.GetUserId() != Construct._USERID)
             {
               //  Debug.Log("WHO AM I " + Clients.GetUserId() + " My NAME IS " + Clients.GetUserName() + " WHATS MY USERSTATE " + Clients.GetUserState());
-                Clients.AddPlayers(
+                Clients.AddPlayers(Clients.GetUserClientSocket(),
                        Clients.GetId(),
     Clients.GetUserId(),
     Clients.GetUserName(),
@@ -858,8 +890,8 @@ namespace TheServer
                            + Construct.USERIPADDRESS + ClientIpAddress
                            + Construct.USERCREDITS + ClientCredits;
 
-            Program.SendData(ClientSocket, data);
-            Program.Disconnected(ClientSocket);
+            Program.SendSelfData(ClientSocket, data);
+            
         }
 
             public static void CheckClientsOnAdsData(Socket ClientSocket, string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ,string ClientUserId, string ClientModType, string ClientState)
@@ -1035,8 +1067,8 @@ namespace TheServer
                             + Construct.USERCREDITS + ClientCredits
                             + Construct.USERSTATE + ClientState;
             }
-            Program.SendData(ClientSocket, data);
-            Program.Disconnected(ClientSocket);
+            Program.SendSelfData(ClientSocket, data);
+            
         }
 
         public static void InsertingIntoClientsTempTable( string ClientDeviceId, string ClientIpAddress, string ClientCredits, string ClientGpsX, string ClientGpsY, string ClientGpsZ)
@@ -1251,8 +1283,8 @@ namespace TheServer
                 //Debug.Error("Database Configeration Error: " + Mex.Message);
             }
             
-            Program.SendData(ClientSocket, data);
-            Program.Disconnected(ClientSocket);
+            Program.SendSelfData(ClientSocket, data);
+            
         }
 
 

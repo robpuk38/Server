@@ -89,10 +89,14 @@ namespace TheServer
         public static string FROMUSERID = "|FROMUSERID|";
         public static string TOUSERID = "|TOUSERID|";
         public static string THEMESSAGE = "|THEMESSAGE|";
+        public static string FROMUSERPIC = "|FROMUSERPIC|";
+        public static string FROMUSERNAME = "|FROMUSERNAME|";
 
 
         public static string _FROMUSERID = "FROMUSERID";
         public static string _TOUSERID = "TOUSERID";
         public static string _THEMESSAGE = "THEMESSAGE";
+        public static string _FROMUSERPIC = "FROMUSERPIC";
+        public static string _FROMUSERNAME = "FROMUSERNAME";
     }
 }
